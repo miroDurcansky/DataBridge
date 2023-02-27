@@ -1,0 +1,1292 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions name="HistoryDbAccessService" targetNamespace="http://dev.rcware.eu/esgdb" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata" xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex" xmlns:msc="http://schemas.microsoft.com/ws/2005/12/wsdl/contract" xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/08/addressing/policy" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:i0="http://dev.rcware.eu/esgdb_HTTP" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:tns="http://dev.rcware.eu/esgdb" xmlns:i1="http://dev.rcware.eu/esgdb_HTTP_GZIP" xmlns:wsa10="http://www.w3.org/2005/08/addressing" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing">
+  <wsp:Policy wsu:Id="HistoryAccessGZip_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <gzip:GZipEncoding xmlns:gzip="http://schemas.microsoft.com/ws/06/2004/mspolicy/netgzip1"/>
+        <wsaw:UsingAddressing/>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsdl:types>
+    <xs:schema elementFormDefault="qualified" targetNamespace="http://dev.rcware.eu/esgdb" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+      <xs:import namespace="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+      <xs:element name="SaveData">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="credentials" type="q1:Credentials" xmlns:q1="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+            <xs:element minOccurs="0" name="records" nillable="true" type="q2:ArrayOfValueRecord" xmlns:q2="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="SaveDataResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="SaveDataResult" type="xs:int"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="EnsureVariables">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="credentials" type="q3:Credentials" xmlns:q3="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+            <xs:element minOccurs="0" name="variables" nillable="true" type="q4:ArrayOfVariableDescription" xmlns:q4="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="EnsureVariablesResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="EnsureVariablesResult" type="q5:EnsureVariablesResult" xmlns:q5="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetData">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="credentials" type="q6:Credentials" xmlns:q6="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+            <xs:element minOccurs="0" name="variablesKey" nillable="true" type="q7:ArrayOfArrayOfKeyValuePair" xmlns:q7="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+            <xs:element minOccurs="0" name="utcFrom" type="xs:dateTime"/>
+            <xs:element minOccurs="0" name="utcTo" type="xs:dateTime"/>
+            <xs:element minOccurs="0" name="variableOffset" type="xs:int"/>
+            <xs:element minOccurs="0" name="variableCount" type="xs:int"/>
+            <xs:element minOccurs="0" name="valueOffset" type="xs:int"/>
+            <xs:element minOccurs="0" name="valueCount" type="xs:int"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetDataResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="GetDataResult" nillable="true" type="q8:ArrayOfMvr" xmlns:q8="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+            <xs:element minOccurs="0" name="nextVariableOffset" type="xs:int"/>
+            <xs:element minOccurs="0" name="nextValueOffset" type="xs:int"/>
+            <xs:element minOccurs="0" name="returnCode" nillable="true" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetDataAsync">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="credentials" type="q9:Credentials" xmlns:q9="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+            <xs:element minOccurs="0" name="variableKeys" nillable="true" type="q10:ArrayOfArrayOfKeyValuePair" xmlns:q10="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+            <xs:element minOccurs="0" name="utcFrom" type="xs:dateTime"/>
+            <xs:element minOccurs="0" name="utcTo" type="xs:dateTime"/>
+            <xs:element minOccurs="0" name="variableOffset" type="xs:int"/>
+            <xs:element minOccurs="0" name="variableCount" type="xs:int"/>
+            <xs:element minOccurs="0" name="valueOffset" type="xs:int"/>
+            <xs:element minOccurs="0" name="valueCount" type="xs:int"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetDataAsyncResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="GetDataAsyncResult" type="q11:GetDataAsyncResult" xmlns:q11="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetParticularData">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="credentials" type="q12:Credentials" xmlns:q12="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+            <xs:element minOccurs="0" name="variableKeys" nillable="true" type="q13:ArrayOfArrayOfKeyValuePair" xmlns:q13="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+            <xs:element minOccurs="0" name="referenceTime" nillable="true" type="xs:dateTime"/>
+            <xs:element minOccurs="0" name="dataSpecification" type="q14:ParticularDataSpecification" xmlns:q14="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+            <xs:element minOccurs="0" name="variableOffset" type="xs:int"/>
+            <xs:element minOccurs="0" name="variableCount" type="xs:int"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetParticularDataResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="GetParticularDataResult" nillable="true" type="q15:ArrayOfMvr" xmlns:q15="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+            <xs:element minOccurs="0" name="nextVariableOffset" type="xs:int"/>
+            <xs:element minOccurs="0" name="returnCode" nillable="true" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetParticularDataAsync">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="credentials" type="q16:Credentials" xmlns:q16="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+            <xs:element minOccurs="0" name="variableKeys" nillable="true" type="q17:ArrayOfArrayOfKeyValuePair" xmlns:q17="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+            <xs:element minOccurs="0" name="referenceTime" nillable="true" type="xs:dateTime"/>
+            <xs:element minOccurs="0" name="dataSpecification" type="q18:ParticularDataSpecification" xmlns:q18="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+            <xs:element minOccurs="0" name="variableOffset" type="xs:int"/>
+            <xs:element minOccurs="0" name="variableCount" type="xs:int"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetParticularDataAsyncResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="GetParticularDataAsyncResult" type="q19:GetParticularDataAsyncResult" xmlns:q19="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetTransformedData">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="credentials" type="q20:Credentials" xmlns:q20="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+            <xs:element minOccurs="0" name="request" type="q21:AggregationRequest" xmlns:q21="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+            <xs:element minOccurs="0" name="variableKeys" nillable="true" type="q22:ArrayOfArrayOfKeyValuePair" xmlns:q22="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+            <xs:element minOccurs="0" name="variableOffset" type="xs:int"/>
+            <xs:element minOccurs="0" name="variableCount" type="xs:int"/>
+            <xs:element minOccurs="0" name="intervalOffset" type="xs:int"/>
+            <xs:element minOccurs="0" name="intervalCount" type="xs:int"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetTransformedDataResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="GetTransformedDataResult" nillable="true" type="q23:ArrayOfVAg" xmlns:q23="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+            <xs:element minOccurs="0" name="nextVariableOffset" type="xs:int"/>
+            <xs:element minOccurs="0" name="nextIntervalOffset" type="xs:int"/>
+            <xs:element minOccurs="0" name="returnCode" nillable="true" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetTransformedDataAsync">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="credentials" type="q24:Credentials" xmlns:q24="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+            <xs:element minOccurs="0" name="request" type="q25:AggregationRequest" xmlns:q25="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+            <xs:element minOccurs="0" name="variableKeys" nillable="true" type="q26:ArrayOfArrayOfKeyValuePair" xmlns:q26="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+            <xs:element minOccurs="0" name="variableOffset" type="xs:int"/>
+            <xs:element minOccurs="0" name="variableCount" type="xs:int"/>
+            <xs:element minOccurs="0" name="intervalOffset" type="xs:int"/>
+            <xs:element minOccurs="0" name="intervalCount" type="xs:int"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetTransformedDataAsyncResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="GetTransformedDataAsyncResult" type="q27:GetTransformedDataAsyncResult" xmlns:q27="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="CheckCredentials">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="credentials" type="q28:Credentials" xmlns:q28="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="CheckCredentialsResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="CheckCredentialsResult" type="xs:boolean"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ServerAlive">
+        <xs:complexType>
+          <xs:sequence/>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ServerAliveResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="ServerAliveResult" type="xs:boolean"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetAllVariables">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="credentials" type="q29:Credentials" xmlns:q29="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+            <xs:element minOccurs="0" name="offset" type="xs:int"/>
+            <xs:element minOccurs="0" name="count" type="xs:int"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetAllVariablesResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="GetAllVariablesResult" nillable="true" type="q30:ArrayOfVariableDescription" xmlns:q30="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+            <xs:element minOccurs="0" name="moreDataAvailable" type="xs:boolean"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetVariables">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="credentials" type="q31:Credentials" xmlns:q31="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+            <xs:element minOccurs="0" name="variableKeys" nillable="true" type="q32:ArrayOfArrayOfKeyValuePair" xmlns:q32="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+            <xs:element minOccurs="0" name="offset" type="xs:int"/>
+            <xs:element minOccurs="0" name="count" type="xs:int"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetVariablesResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="GetVariablesResult" nillable="true" type="q33:ArrayOfVariableDescription" xmlns:q33="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+            <xs:element minOccurs="0" name="nextOffset" type="xs:int"/>
+            <xs:element minOccurs="0" name="returnCode" nillable="true" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetVariableStats">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="credentials" type="q34:Credentials" xmlns:q34="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+            <xs:element minOccurs="0" name="variableKeys" nillable="true" type="q35:ArrayOfArrayOfKeyValuePair" xmlns:q35="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+            <xs:element minOccurs="0" name="offset" type="xs:int"/>
+            <xs:element minOccurs="0" name="count" type="xs:int"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetVariableStatsResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="GetVariableStatsResult" nillable="true" type="q36:ArrayOfVariableStatistics" xmlns:q36="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+            <xs:element minOccurs="0" name="nextOffset" type="xs:int"/>
+            <xs:element minOccurs="0" name="returnCode" nillable="true" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetVariableStatsAsync">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="credentials" type="q37:Credentials" xmlns:q37="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+            <xs:element minOccurs="0" name="variableKeys" nillable="true" type="q38:ArrayOfArrayOfKeyValuePair" xmlns:q38="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+            <xs:element minOccurs="0" name="offset" type="xs:int"/>
+            <xs:element minOccurs="0" name="count" type="xs:int"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetVariableStatsAsyncResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="GetVariableStatsAsyncResult" type="q39:GetVariableStatsAsyncResult" xmlns:q39="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="DeleteData">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="credentials" type="q40:Credentials" xmlns:q40="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+            <xs:element minOccurs="0" name="variableKeys" nillable="true" type="q41:ArrayOfArrayOfKeyValuePair" xmlns:q41="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+            <xs:element minOccurs="0" name="from" type="xs:dateTime"/>
+            <xs:element minOccurs="0" name="to" type="xs:dateTime"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="DeleteDataResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="DeleteDataResult" type="xs:int"/>
+            <xs:element minOccurs="0" name="returnCode" nillable="true" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="DeleteVariables">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="credentials" type="q42:Credentials" xmlns:q42="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+            <xs:element minOccurs="0" name="variableKeys" nillable="true" type="q43:ArrayOfArrayOfKeyValuePair" xmlns:q43="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="DeleteVariablesResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="DeleteVariablesResult" type="xs:int"/>
+            <xs:element minOccurs="0" name="returnCode" nillable="true" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetServerVersion">
+        <xs:complexType>
+          <xs:sequence/>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetServerVersionResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="GetServerVersionResult" type="xs:int"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:schema>
+    <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://schemas.microsoft.com/2003/10/Serialization/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://schemas.microsoft.com/2003/10/Serialization/">
+      <xs:element name="anyType" nillable="true" type="xs:anyType"/>
+      <xs:element name="anyURI" nillable="true" type="xs:anyURI"/>
+      <xs:element name="base64Binary" nillable="true" type="xs:base64Binary"/>
+      <xs:element name="boolean" nillable="true" type="xs:boolean"/>
+      <xs:element name="byte" nillable="true" type="xs:byte"/>
+      <xs:element name="dateTime" nillable="true" type="xs:dateTime"/>
+      <xs:element name="decimal" nillable="true" type="xs:decimal"/>
+      <xs:element name="double" nillable="true" type="xs:double"/>
+      <xs:element name="float" nillable="true" type="xs:float"/>
+      <xs:element name="int" nillable="true" type="xs:int"/>
+      <xs:element name="long" nillable="true" type="xs:long"/>
+      <xs:element name="QName" nillable="true" type="xs:QName"/>
+      <xs:element name="short" nillable="true" type="xs:short"/>
+      <xs:element name="string" nillable="true" type="xs:string"/>
+      <xs:element name="unsignedByte" nillable="true" type="xs:unsignedByte"/>
+      <xs:element name="unsignedInt" nillable="true" type="xs:unsignedInt"/>
+      <xs:element name="unsignedLong" nillable="true" type="xs:unsignedLong"/>
+      <xs:element name="unsignedShort" nillable="true" type="xs:unsignedShort"/>
+      <xs:element name="char" nillable="true" type="tns:char"/>
+      <xs:simpleType name="char">
+        <xs:restriction base="xs:int"/>
+      </xs:simpleType>
+      <xs:element name="duration" nillable="true" type="tns:duration"/>
+      <xs:simpleType name="duration">
+        <xs:restriction base="xs:duration">
+          <xs:pattern value="\-?P(\d*D)?(T(\d*H)?(\d*M)?(\d*(\.\d*)?S)?)?"/>
+          <xs:minInclusive value="-P10675199DT2H48M5.4775808S"/>
+          <xs:maxInclusive value="P10675199DT2H48M5.4775807S"/>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:element name="guid" nillable="true" type="tns:guid"/>
+      <xs:simpleType name="guid">
+        <xs:restriction base="xs:string">
+          <xs:pattern value="[\da-fA-F]{8}-[\da-fA-F]{4}-[\da-fA-F]{4}-[\da-fA-F]{4}-[\da-fA-F]{12}"/>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:attribute name="FactoryType" type="xs:QName"/>
+      <xs:attribute name="Id" type="xs:ID"/>
+      <xs:attribute name="Ref" type="xs:IDREF"/>
+    </xs:schema>
+    <xs:schema elementFormDefault="qualified" targetNamespace="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://schemas.datacontract.org/2004/07/ESG.Db.Server.Shared" xmlns:ser="http://schemas.microsoft.com/2003/10/Serialization/">
+      <xs:import namespace="http://schemas.microsoft.com/2003/10/Serialization/"/>
+      <xs:import namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays"/>
+      <xs:complexType name="Credentials">
+        <xs:annotation>
+          <xs:appinfo>
+            <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Name" nillable="true" type="xs:string"/>
+          <xs:element minOccurs="0" name="Password" nillable="true" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="Credentials" nillable="true" type="tns:Credentials"/>
+      <xs:complexType name="ArrayOfValueRecord">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="ValueRecord" nillable="true" type="tns:ValueRecord"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="ArrayOfValueRecord" nillable="true" type="tns:ArrayOfValueRecord"/>
+      <xs:complexType name="ValueRecord">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="BlobValue" nillable="true" type="xs:base64Binary">
+            <xs:annotation>
+              <xs:appinfo>
+                <DefaultValue EmitDefaultValue="false" xmlns="http://schemas.microsoft.com/2003/10/Serialization/"/>
+              </xs:appinfo>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="BooleanValue" type="xs:boolean">
+            <xs:annotation>
+              <xs:appinfo>
+                <DefaultValue EmitDefaultValue="false" xmlns="http://schemas.microsoft.com/2003/10/Serialization/"/>
+              </xs:appinfo>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="DateTimeValue" type="xs:dateTime">
+            <xs:annotation>
+              <xs:appinfo>
+                <DefaultValue EmitDefaultValue="false" xmlns="http://schemas.microsoft.com/2003/10/Serialization/"/>
+              </xs:appinfo>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="DoubleValue" type="xs:double">
+            <xs:annotation>
+              <xs:appinfo>
+                <DefaultValue EmitDefaultValue="false" xmlns="http://schemas.microsoft.com/2003/10/Serialization/"/>
+              </xs:appinfo>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="ForceSave" type="xs:boolean"/>
+          <xs:element minOccurs="0" name="GoodThrough" type="xs:dateTime"/>
+          <xs:element minOccurs="0" name="HistoryValueType" type="tns:HistoryValueType"/>
+          <xs:element minOccurs="0" name="Int64Value" type="xs:long">
+            <xs:annotation>
+              <xs:appinfo>
+                <DefaultValue EmitDefaultValue="false" xmlns="http://schemas.microsoft.com/2003/10/Serialization/"/>
+              </xs:appinfo>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="Interval" type="xs:double"/>
+          <xs:element minOccurs="0" name="Keys" nillable="true" type="tns:ArrayOfKeyValuePair"/>
+          <xs:element minOccurs="0" name="StringValue" nillable="true" type="xs:string">
+            <xs:annotation>
+              <xs:appinfo>
+                <DefaultValue EmitDefaultValue="false" xmlns="http://schemas.microsoft.com/2003/10/Serialization/"/>
+              </xs:appinfo>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="UtcTimeStamp" type="xs:dateTime"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="ValueRecord" nillable="true" type="tns:ValueRecord"/>
+      <xs:simpleType name="HistoryValueType">
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="Double"/>
+          <xs:enumeration value="Blob"/>
+          <xs:enumeration value="String"/>
+          <xs:enumeration value="Int64"/>
+          <xs:enumeration value="NotDefined"/>
+          <xs:enumeration value="ISODateTime"/>
+          <xs:enumeration value="Boolean"/>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:element name="HistoryValueType" nillable="true" type="tns:HistoryValueType"/>
+      <xs:complexType name="ArrayOfKeyValuePair">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="KeyValuePair" nillable="true" type="tns:KeyValuePair"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="ArrayOfKeyValuePair" nillable="true" type="tns:ArrayOfKeyValuePair"/>
+      <xs:complexType name="KeyValuePair">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="IsKey" type="xs:boolean"/>
+          <xs:element minOccurs="0" name="Key" nillable="true" type="xs:string"/>
+          <xs:element minOccurs="0" name="Value" nillable="true" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="KeyValuePair" nillable="true" type="tns:KeyValuePair"/>
+      <xs:complexType name="ArrayOfVariableDescription">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="VariableDescription" nillable="true" type="tns:VariableDescription"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="ArrayOfVariableDescription" nillable="true" type="tns:ArrayOfVariableDescription"/>
+      <xs:complexType name="VariableDescription">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Keys" nillable="true" type="tns:ArrayOfKeyValuePair"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="VariableDescription" nillable="true" type="tns:VariableDescription"/>
+      <xs:complexType name="EnsureVariablesResult">
+        <xs:annotation>
+          <xs:appinfo>
+            <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element minOccurs="0" name="ReturnCode" nillable="true" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="EnsureVariablesResult" nillable="true" type="tns:EnsureVariablesResult"/>
+      <xs:complexType name="ArrayOfArrayOfKeyValuePair">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="ArrayOfKeyValuePair" nillable="true" type="tns:ArrayOfKeyValuePair"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="ArrayOfArrayOfKeyValuePair" nillable="true" type="tns:ArrayOfArrayOfKeyValuePair"/>
+      <xs:complexType name="ArrayOfMvr">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="Mvr" nillable="true" type="tns:Mvr"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="ArrayOfMvr" nillable="true" type="tns:ArrayOfMvr"/>
+      <xs:complexType name="Mvr">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Keys" nillable="true" type="tns:ArrayOfKeyValuePair"/>
+          <xs:element minOccurs="0" name="Vals" nillable="true" type="tns:ArrayOfI"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="Mvr" nillable="true" type="tns:Mvr"/>
+      <xs:complexType name="ArrayOfI">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="I" nillable="true" type="tns:I"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="ArrayOfI" nillable="true" type="tns:ArrayOfI"/>
+      <xs:complexType name="I">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="BinV" nillable="true" type="xs:base64Binary">
+            <xs:annotation>
+              <xs:appinfo>
+                <DefaultValue EmitDefaultValue="false" xmlns="http://schemas.microsoft.com/2003/10/Serialization/"/>
+              </xs:appinfo>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="Bv" nillable="true" type="xs:boolean">
+            <xs:annotation>
+              <xs:appinfo>
+                <DefaultValue EmitDefaultValue="false" xmlns="http://schemas.microsoft.com/2003/10/Serialization/"/>
+              </xs:appinfo>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="Dtv" nillable="true" type="xs:dateTime">
+            <xs:annotation>
+              <xs:appinfo>
+                <DefaultValue EmitDefaultValue="false" xmlns="http://schemas.microsoft.com/2003/10/Serialization/"/>
+              </xs:appinfo>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="Dv" nillable="true" type="xs:double">
+            <xs:annotation>
+              <xs:appinfo>
+                <DefaultValue EmitDefaultValue="false" xmlns="http://schemas.microsoft.com/2003/10/Serialization/"/>
+              </xs:appinfo>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="Gt" type="xs:dateTime"/>
+          <xs:element minOccurs="0" name="Hvt" type="tns:HistoryValueType"/>
+          <xs:element minOccurs="0" name="Iv" nillable="true" type="xs:long">
+            <xs:annotation>
+              <xs:appinfo>
+                <DefaultValue EmitDefaultValue="false" xmlns="http://schemas.microsoft.com/2003/10/Serialization/"/>
+              </xs:appinfo>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="Ivl" type="xs:double"/>
+          <xs:element minOccurs="0" name="Sv" nillable="true" type="xs:string">
+            <xs:annotation>
+              <xs:appinfo>
+                <DefaultValue EmitDefaultValue="false" xmlns="http://schemas.microsoft.com/2003/10/Serialization/"/>
+              </xs:appinfo>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="Ts" type="xs:dateTime"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="I" nillable="true" type="tns:I"/>
+      <xs:complexType name="GetDataAsyncResult">
+        <xs:annotation>
+          <xs:appinfo>
+            <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Data" nillable="true" type="tns:ArrayOfMvr"/>
+          <xs:element minOccurs="0" name="NextValueOffset" type="xs:int"/>
+          <xs:element minOccurs="0" name="NextVariableOffset" type="xs:int"/>
+          <xs:element minOccurs="0" name="ReturnCode" nillable="true" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="GetDataAsyncResult" nillable="true" type="tns:GetDataAsyncResult"/>
+      <xs:simpleType name="ParticularDataSpecification">
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="MinTimestamp"/>
+          <xs:enumeration value="MaxTimestamp"/>
+          <xs:enumeration value="FirstLessThanReferenceDateTime"/>
+          <xs:enumeration value="FirstLessThanOrEqualThanReferenceTime"/>
+          <xs:enumeration value="FirstGreaterThanReferenceDateTime"/>
+          <xs:enumeration value="FirstGreaterThanOrEqualThanReferenceTime"/>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:element name="ParticularDataSpecification" nillable="true" type="tns:ParticularDataSpecification"/>
+      <xs:complexType name="GetParticularDataAsyncResult">
+        <xs:annotation>
+          <xs:appinfo>
+            <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Data" nillable="true" type="tns:ArrayOfMvr"/>
+          <xs:element minOccurs="0" name="NextVariableOffset" type="xs:int"/>
+          <xs:element minOccurs="0" name="ReturnCode" nillable="true" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="GetParticularDataAsyncResult" nillable="true" type="tns:GetParticularDataAsyncResult"/>
+      <xs:complexType name="AggregationRequest">
+        <xs:annotation>
+          <xs:appinfo>
+            <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element minOccurs="0" name="DefaultValue" type="xs:double"/>
+          <xs:element minOccurs="0" name="From" type="xs:dateTime"/>
+          <xs:element minOccurs="0" name="Interpolation" type="tns:InterpolationType"/>
+          <xs:element minOccurs="0" name="IsoPattern" nillable="true" type="q1:ArrayOfstring" xmlns:q1="http://schemas.microsoft.com/2003/10/Serialization/Arrays"/>
+          <xs:element minOccurs="0" name="MaxNeighborDistance" type="ser:duration"/>
+          <xs:element minOccurs="0" name="TimeZone" nillable="true" type="xs:string"/>
+          <xs:element minOccurs="0" name="To" type="xs:dateTime"/>
+          <xs:element minOccurs="0" name="Types" nillable="true" type="tns:ArrayOfAggregationType"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="AggregationRequest" nillable="true" type="tns:AggregationRequest"/>
+      <xs:simpleType name="InterpolationType">
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="None"/>
+          <xs:enumeration value="MissingBorderDefaultInnerDefault"/>
+          <xs:enumeration value="MissingBorderDefaultInnerInterpolate"/>
+          <xs:enumeration value="MissingBorderInterpolateInnerInterpolate"/>
+          <xs:enumeration value="MissingBorderOmittedInnerOmitted"/>
+          <xs:enumeration value="MissingBorderCopyInnerCopy"/>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:element name="InterpolationType" nillable="true" type="tns:InterpolationType"/>
+      <xs:complexType name="ArrayOfAggregationType">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="AggregationType" type="tns:AggregationType"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="ArrayOfAggregationType" nillable="true" type="tns:ArrayOfAggregationType"/>
+      <xs:simpleType name="AggregationType">
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="Min"/>
+          <xs:enumeration value="Max"/>
+          <xs:enumeration value="Sum"/>
+          <xs:enumeration value="Avg"/>
+          <xs:enumeration value="First"/>
+          <xs:enumeration value="Last"/>
+          <xs:enumeration value="Median"/>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:element name="AggregationType" nillable="true" type="tns:AggregationType"/>
+      <xs:complexType name="ArrayOfVAg">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="VAg" type="tns:VAg"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="ArrayOfVAg" nillable="true" type="tns:ArrayOfVAg"/>
+      <xs:complexType name="VAg">
+        <xs:annotation>
+          <xs:appinfo>
+            <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Data" nillable="true" type="tns:ArrayOfInterval"/>
+          <xs:element minOccurs="0" name="Keys" nillable="true" type="tns:ArrayOfKeyValuePair"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="VAg" nillable="true" type="tns:VAg"/>
+      <xs:complexType name="ArrayOfInterval">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="Interval" nillable="true" type="tns:Interval"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="ArrayOfInterval" nillable="true" type="tns:ArrayOfInterval"/>
+      <xs:complexType name="Interval">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Avg" nillable="true" type="tns:Tp">
+            <xs:annotation>
+              <xs:appinfo>
+                <DefaultValue EmitDefaultValue="false" xmlns="http://schemas.microsoft.com/2003/10/Serialization/"/>
+              </xs:appinfo>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="B" type="xs:dateTime"/>
+          <xs:element minOccurs="0" name="E" type="xs:dateTime"/>
+          <xs:element minOccurs="0" name="F" type="xs:int"/>
+          <xs:element minOccurs="0" name="First" nillable="true" type="tns:Tp">
+            <xs:annotation>
+              <xs:appinfo>
+                <DefaultValue EmitDefaultValue="false" xmlns="http://schemas.microsoft.com/2003/10/Serialization/"/>
+              </xs:appinfo>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="Last" nillable="true" type="tns:Tp">
+            <xs:annotation>
+              <xs:appinfo>
+                <DefaultValue EmitDefaultValue="false" xmlns="http://schemas.microsoft.com/2003/10/Serialization/"/>
+              </xs:appinfo>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="Max" nillable="true" type="tns:Tp">
+            <xs:annotation>
+              <xs:appinfo>
+                <DefaultValue EmitDefaultValue="false" xmlns="http://schemas.microsoft.com/2003/10/Serialization/"/>
+              </xs:appinfo>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="Med" nillable="true" type="tns:Tp">
+            <xs:annotation>
+              <xs:appinfo>
+                <DefaultValue EmitDefaultValue="false" xmlns="http://schemas.microsoft.com/2003/10/Serialization/"/>
+              </xs:appinfo>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="Min" nillable="true" type="tns:Tp">
+            <xs:annotation>
+              <xs:appinfo>
+                <DefaultValue EmitDefaultValue="false" xmlns="http://schemas.microsoft.com/2003/10/Serialization/"/>
+              </xs:appinfo>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="Q" type="xs:double"/>
+          <xs:element minOccurs="0" name="Sum" nillable="true" type="tns:Tp">
+            <xs:annotation>
+              <xs:appinfo>
+                <DefaultValue EmitDefaultValue="false" xmlns="http://schemas.microsoft.com/2003/10/Serialization/"/>
+              </xs:appinfo>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="Interval" nillable="true" type="tns:Interval"/>
+      <xs:complexType name="Tp">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="O" type="ser:char">
+            <xs:annotation>
+              <xs:appinfo>
+                <DefaultValue EmitDefaultValue="false" xmlns="http://schemas.microsoft.com/2003/10/Serialization/"/>
+              </xs:appinfo>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="S" nillable="true" type="xs:dateTime">
+            <xs:annotation>
+              <xs:appinfo>
+                <DefaultValue EmitDefaultValue="false" xmlns="http://schemas.microsoft.com/2003/10/Serialization/"/>
+              </xs:appinfo>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="V" type="xs:double"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="Tp" nillable="true" type="tns:Tp"/>
+      <xs:complexType name="GetTransformedDataAsyncResult">
+        <xs:annotation>
+          <xs:appinfo>
+            <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Data" nillable="true" type="tns:ArrayOfVAg"/>
+          <xs:element minOccurs="0" name="NextIntervalOffset" type="xs:int"/>
+          <xs:element minOccurs="0" name="NextVariableOffset" type="xs:int"/>
+          <xs:element minOccurs="0" name="ReturnCode" nillable="true" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="GetTransformedDataAsyncResult" nillable="true" type="tns:GetTransformedDataAsyncResult"/>
+      <xs:complexType name="ArrayOfVariableStatistics">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="VariableStatistics" nillable="true" type="tns:VariableStatistics"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="ArrayOfVariableStatistics" nillable="true" type="tns:ArrayOfVariableStatistics"/>
+      <xs:complexType name="VariableStatistics">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Keys" nillable="true" type="tns:ArrayOfKeyValuePair"/>
+          <xs:element minOccurs="0" name="MaxTime" type="xs:dateTime"/>
+          <xs:element minOccurs="0" name="MinTime" type="xs:dateTime"/>
+          <xs:element minOccurs="0" name="ValueCount" type="xs:long"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="VariableStatistics" nillable="true" type="tns:VariableStatistics"/>
+      <xs:complexType name="GetVariableStatsAsyncResult">
+        <xs:annotation>
+          <xs:appinfo>
+            <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Data" nillable="true" type="tns:ArrayOfVariableStatistics"/>
+          <xs:element minOccurs="0" name="NextOffset" type="xs:int"/>
+          <xs:element minOccurs="0" name="ReturnCode" nillable="true" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="GetVariableStatsAsyncResult" nillable="true" type="tns:GetVariableStatsAsyncResult"/>
+    </xs:schema>
+    <xs:schema elementFormDefault="qualified" targetNamespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://schemas.microsoft.com/2003/10/Serialization/Arrays">
+      <xs:complexType name="ArrayOfstring">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="string" nillable="true" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="ArrayOfstring" nillable="true" type="tns:ArrayOfstring"/>
+    </xs:schema>
+  </wsdl:types>
+  <wsdl:message name="HistoryDbAccess_SaveData_InputMessage">
+    <wsdl:part name="parameters" element="tns:SaveData"/>
+  </wsdl:message>
+  <wsdl:message name="HistoryDbAccess_SaveData_OutputMessage">
+    <wsdl:part name="parameters" element="tns:SaveDataResponse"/>
+  </wsdl:message>
+  <wsdl:message name="HistoryDbAccess_EnsureVariables_InputMessage">
+    <wsdl:part name="parameters" element="tns:EnsureVariables"/>
+  </wsdl:message>
+  <wsdl:message name="HistoryDbAccess_EnsureVariables_OutputMessage">
+    <wsdl:part name="parameters" element="tns:EnsureVariablesResponse"/>
+  </wsdl:message>
+  <wsdl:message name="HistoryDbAccess_GetData_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetData"/>
+  </wsdl:message>
+  <wsdl:message name="HistoryDbAccess_GetData_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetDataResponse"/>
+  </wsdl:message>
+  <wsdl:message name="HistoryDbAccess_GetDataAsync_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetDataAsync"/>
+  </wsdl:message>
+  <wsdl:message name="HistoryDbAccess_GetDataAsync_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetDataAsyncResponse"/>
+  </wsdl:message>
+  <wsdl:message name="HistoryDbAccess_GetParticularData_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetParticularData"/>
+  </wsdl:message>
+  <wsdl:message name="HistoryDbAccess_GetParticularData_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetParticularDataResponse"/>
+  </wsdl:message>
+  <wsdl:message name="HistoryDbAccess_GetParticularDataAsync_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetParticularDataAsync"/>
+  </wsdl:message>
+  <wsdl:message name="HistoryDbAccess_GetParticularDataAsync_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetParticularDataAsyncResponse"/>
+  </wsdl:message>
+  <wsdl:message name="HistoryDbAccess_GetTransformedData_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetTransformedData"/>
+  </wsdl:message>
+  <wsdl:message name="HistoryDbAccess_GetTransformedData_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetTransformedDataResponse"/>
+  </wsdl:message>
+  <wsdl:message name="HistoryDbAccess_GetTransformedDataAsync_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetTransformedDataAsync"/>
+  </wsdl:message>
+  <wsdl:message name="HistoryDbAccess_GetTransformedDataAsync_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetTransformedDataAsyncResponse"/>
+  </wsdl:message>
+  <wsdl:message name="HistoryDbAccess_CheckCredentials_InputMessage">
+    <wsdl:part name="parameters" element="tns:CheckCredentials"/>
+  </wsdl:message>
+  <wsdl:message name="HistoryDbAccess_CheckCredentials_OutputMessage">
+    <wsdl:part name="parameters" element="tns:CheckCredentialsResponse"/>
+  </wsdl:message>
+  <wsdl:message name="HistoryDbAccess_ServerAlive_InputMessage">
+    <wsdl:part name="parameters" element="tns:ServerAlive"/>
+  </wsdl:message>
+  <wsdl:message name="HistoryDbAccess_ServerAlive_OutputMessage">
+    <wsdl:part name="parameters" element="tns:ServerAliveResponse"/>
+  </wsdl:message>
+  <wsdl:message name="HistoryDbAccess_GetAllVariables_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetAllVariables"/>
+  </wsdl:message>
+  <wsdl:message name="HistoryDbAccess_GetAllVariables_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetAllVariablesResponse"/>
+  </wsdl:message>
+  <wsdl:message name="HistoryDbAccess_GetVariables_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetVariables"/>
+  </wsdl:message>
+  <wsdl:message name="HistoryDbAccess_GetVariables_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetVariablesResponse"/>
+  </wsdl:message>
+  <wsdl:message name="HistoryDbAccess_GetVariableStats_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetVariableStats"/>
+  </wsdl:message>
+  <wsdl:message name="HistoryDbAccess_GetVariableStats_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetVariableStatsResponse"/>
+  </wsdl:message>
+  <wsdl:message name="HistoryDbAccess_GetVariableStatsAsync_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetVariableStatsAsync"/>
+  </wsdl:message>
+  <wsdl:message name="HistoryDbAccess_GetVariableStatsAsync_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetVariableStatsAsyncResponse"/>
+  </wsdl:message>
+  <wsdl:message name="HistoryDbAccess_DeleteData_InputMessage">
+    <wsdl:part name="parameters" element="tns:DeleteData"/>
+  </wsdl:message>
+  <wsdl:message name="HistoryDbAccess_DeleteData_OutputMessage">
+    <wsdl:part name="parameters" element="tns:DeleteDataResponse"/>
+  </wsdl:message>
+  <wsdl:message name="HistoryDbAccess_DeleteVariables_InputMessage">
+    <wsdl:part name="parameters" element="tns:DeleteVariables"/>
+  </wsdl:message>
+  <wsdl:message name="HistoryDbAccess_DeleteVariables_OutputMessage">
+    <wsdl:part name="parameters" element="tns:DeleteVariablesResponse"/>
+  </wsdl:message>
+  <wsdl:message name="HistoryDbAccess_GetServerVersion_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetServerVersion"/>
+  </wsdl:message>
+  <wsdl:message name="HistoryDbAccess_GetServerVersion_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetServerVersionResponse"/>
+  </wsdl:message>
+  <wsdl:portType name="HistoryDbAccess">
+    <wsdl:operation name="SaveData">
+      <wsdl:input wsaw:Action="http://dev.rcware.eu/esgdb/HistoryDbAccess/SaveData" message="tns:HistoryDbAccess_SaveData_InputMessage"/>
+      <wsdl:output wsaw:Action="http://dev.rcware.eu/esgdb/HistoryDbAccess/SaveDataResponse" message="tns:HistoryDbAccess_SaveData_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="EnsureVariables">
+      <wsdl:input wsaw:Action="http://dev.rcware.eu/esgdb/HistoryDbAccess/EnsureVariables" message="tns:HistoryDbAccess_EnsureVariables_InputMessage"/>
+      <wsdl:output wsaw:Action="http://dev.rcware.eu/esgdb/HistoryDbAccess/EnsureVariablesResponse" message="tns:HistoryDbAccess_EnsureVariables_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="GetData">
+      <wsdl:input wsaw:Action="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetData" message="tns:HistoryDbAccess_GetData_InputMessage"/>
+      <wsdl:output wsaw:Action="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetDataResponse" message="tns:HistoryDbAccess_GetData_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="GetDataAsync">
+      <wsdl:input wsaw:Action="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetDataAsync" message="tns:HistoryDbAccess_GetDataAsync_InputMessage"/>
+      <wsdl:output wsaw:Action="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetDataAsyncResponse" message="tns:HistoryDbAccess_GetDataAsync_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="GetParticularData">
+      <wsdl:input wsaw:Action="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetParticularData" message="tns:HistoryDbAccess_GetParticularData_InputMessage"/>
+      <wsdl:output wsaw:Action="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetParticularDataResponse" message="tns:HistoryDbAccess_GetParticularData_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="GetParticularDataAsync">
+      <wsdl:input wsaw:Action="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetParticularDataAsync" message="tns:HistoryDbAccess_GetParticularDataAsync_InputMessage"/>
+      <wsdl:output wsaw:Action="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetParticularDataAsyncResponse" message="tns:HistoryDbAccess_GetParticularDataAsync_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="GetTransformedData">
+      <wsdl:input wsaw:Action="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetTransformedData" message="tns:HistoryDbAccess_GetTransformedData_InputMessage"/>
+      <wsdl:output wsaw:Action="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetTransformedDataResponse" message="tns:HistoryDbAccess_GetTransformedData_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="GetTransformedDataAsync">
+      <wsdl:input wsaw:Action="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetTransformedDataAsync" message="tns:HistoryDbAccess_GetTransformedDataAsync_InputMessage"/>
+      <wsdl:output wsaw:Action="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetTransformedDataAsyncResponse" message="tns:HistoryDbAccess_GetTransformedDataAsync_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="CheckCredentials">
+      <wsdl:input wsaw:Action="http://dev.rcware.eu/esgdb/HistoryDbAccess/CheckCredentials" message="tns:HistoryDbAccess_CheckCredentials_InputMessage"/>
+      <wsdl:output wsaw:Action="http://dev.rcware.eu/esgdb/HistoryDbAccess/CheckCredentialsResponse" message="tns:HistoryDbAccess_CheckCredentials_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="ServerAlive">
+      <wsdl:input wsaw:Action="http://dev.rcware.eu/esgdb/HistoryDbAccess/ServerAlive" message="tns:HistoryDbAccess_ServerAlive_InputMessage"/>
+      <wsdl:output wsaw:Action="http://dev.rcware.eu/esgdb/HistoryDbAccess/ServerAliveResponse" message="tns:HistoryDbAccess_ServerAlive_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllVariables">
+      <wsdl:input wsaw:Action="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetAllVariables" message="tns:HistoryDbAccess_GetAllVariables_InputMessage"/>
+      <wsdl:output wsaw:Action="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetAllVariablesResponse" message="tns:HistoryDbAccess_GetAllVariables_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="GetVariables">
+      <wsdl:input wsaw:Action="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetVariables" message="tns:HistoryDbAccess_GetVariables_InputMessage"/>
+      <wsdl:output wsaw:Action="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetVariablesResponse" message="tns:HistoryDbAccess_GetVariables_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="GetVariableStats">
+      <wsdl:input wsaw:Action="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetVariableStats" message="tns:HistoryDbAccess_GetVariableStats_InputMessage"/>
+      <wsdl:output wsaw:Action="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetVariableStatsResponse" message="tns:HistoryDbAccess_GetVariableStats_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="GetVariableStatsAsync">
+      <wsdl:input wsaw:Action="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetVariableStatsAsync" message="tns:HistoryDbAccess_GetVariableStatsAsync_InputMessage"/>
+      <wsdl:output wsaw:Action="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetVariableStatsAsyncResponse" message="tns:HistoryDbAccess_GetVariableStatsAsync_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteData">
+      <wsdl:input wsaw:Action="http://dev.rcware.eu/esgdb/HistoryDbAccess/DeleteData" message="tns:HistoryDbAccess_DeleteData_InputMessage"/>
+      <wsdl:output wsaw:Action="http://dev.rcware.eu/esgdb/HistoryDbAccess/DeleteDataResponse" message="tns:HistoryDbAccess_DeleteData_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteVariables">
+      <wsdl:input wsaw:Action="http://dev.rcware.eu/esgdb/HistoryDbAccess/DeleteVariables" message="tns:HistoryDbAccess_DeleteVariables_InputMessage"/>
+      <wsdl:output wsaw:Action="http://dev.rcware.eu/esgdb/HistoryDbAccess/DeleteVariablesResponse" message="tns:HistoryDbAccess_DeleteVariables_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="GetServerVersion">
+      <wsdl:input wsaw:Action="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetServerVersion" message="tns:HistoryDbAccess_GetServerVersion_InputMessage"/>
+      <wsdl:output wsaw:Action="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetServerVersionResponse" message="tns:HistoryDbAccess_GetServerVersion_OutputMessage"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="HistoryAccess" type="tns:HistoryDbAccess">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="SaveData">
+      <soap:operation soapAction="http://dev.rcware.eu/esgdb/HistoryDbAccess/SaveData" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="EnsureVariables">
+      <soap:operation soapAction="http://dev.rcware.eu/esgdb/HistoryDbAccess/EnsureVariables" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetData">
+      <soap:operation soapAction="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetData" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetDataAsync">
+      <soap:operation soapAction="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetDataAsync" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetParticularData">
+      <soap:operation soapAction="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetParticularData" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetParticularDataAsync">
+      <soap:operation soapAction="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetParticularDataAsync" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetTransformedData">
+      <soap:operation soapAction="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetTransformedData" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetTransformedDataAsync">
+      <soap:operation soapAction="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetTransformedDataAsync" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CheckCredentials">
+      <soap:operation soapAction="http://dev.rcware.eu/esgdb/HistoryDbAccess/CheckCredentials" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ServerAlive">
+      <soap:operation soapAction="http://dev.rcware.eu/esgdb/HistoryDbAccess/ServerAlive" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllVariables">
+      <soap:operation soapAction="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetAllVariables" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetVariables">
+      <soap:operation soapAction="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetVariables" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetVariableStats">
+      <soap:operation soapAction="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetVariableStats" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetVariableStatsAsync">
+      <soap:operation soapAction="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetVariableStatsAsync" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteData">
+      <soap:operation soapAction="http://dev.rcware.eu/esgdb/HistoryDbAccess/DeleteData" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteVariables">
+      <soap:operation soapAction="http://dev.rcware.eu/esgdb/HistoryDbAccess/DeleteVariables" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetServerVersion">
+      <soap:operation soapAction="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetServerVersion" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="HistoryAccessGZip" type="tns:HistoryDbAccess">
+    <wsp:PolicyReference URI="#HistoryAccessGZip_policy"/>
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="SaveData">
+      <soap12:operation soapAction="http://dev.rcware.eu/esgdb/HistoryDbAccess/SaveData" style="document"/>
+      <wsdl:input>
+        <soap12:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="EnsureVariables">
+      <soap12:operation soapAction="http://dev.rcware.eu/esgdb/HistoryDbAccess/EnsureVariables" style="document"/>
+      <wsdl:input>
+        <soap12:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetData">
+      <soap12:operation soapAction="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetData" style="document"/>
+      <wsdl:input>
+        <soap12:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetDataAsync">
+      <soap12:operation soapAction="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetDataAsync" style="document"/>
+      <wsdl:input>
+        <soap12:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetParticularData">
+      <soap12:operation soapAction="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetParticularData" style="document"/>
+      <wsdl:input>
+        <soap12:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetParticularDataAsync">
+      <soap12:operation soapAction="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetParticularDataAsync" style="document"/>
+      <wsdl:input>
+        <soap12:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetTransformedData">
+      <soap12:operation soapAction="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetTransformedData" style="document"/>
+      <wsdl:input>
+        <soap12:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetTransformedDataAsync">
+      <soap12:operation soapAction="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetTransformedDataAsync" style="document"/>
+      <wsdl:input>
+        <soap12:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CheckCredentials">
+      <soap12:operation soapAction="http://dev.rcware.eu/esgdb/HistoryDbAccess/CheckCredentials" style="document"/>
+      <wsdl:input>
+        <soap12:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ServerAlive">
+      <soap12:operation soapAction="http://dev.rcware.eu/esgdb/HistoryDbAccess/ServerAlive" style="document"/>
+      <wsdl:input>
+        <soap12:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllVariables">
+      <soap12:operation soapAction="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetAllVariables" style="document"/>
+      <wsdl:input>
+        <soap12:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetVariables">
+      <soap12:operation soapAction="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetVariables" style="document"/>
+      <wsdl:input>
+        <soap12:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetVariableStats">
+      <soap12:operation soapAction="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetVariableStats" style="document"/>
+      <wsdl:input>
+        <soap12:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetVariableStatsAsync">
+      <soap12:operation soapAction="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetVariableStatsAsync" style="document"/>
+      <wsdl:input>
+        <soap12:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteData">
+      <soap12:operation soapAction="http://dev.rcware.eu/esgdb/HistoryDbAccess/DeleteData" style="document"/>
+      <wsdl:input>
+        <soap12:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteVariables">
+      <soap12:operation soapAction="http://dev.rcware.eu/esgdb/HistoryDbAccess/DeleteVariables" style="document"/>
+      <wsdl:input>
+        <soap12:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetServerVersion">
+      <soap12:operation soapAction="http://dev.rcware.eu/esgdb/HistoryDbAccess/GetServerVersion" style="document"/>
+      <wsdl:input>
+        <soap12:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="HistoryDbAccessService">
+    <wsdl:port name="HistoryAccess" binding="tns:HistoryAccess">
+      <soap:address location="http://localhost:9876/RcWareDbAccess"/>
+    </wsdl:port>
+    <wsdl:port name="HistoryAccessGZip" binding="tns:HistoryAccessGZip">
+      <soap12:address location="http://localhost:9876/RcWareDbGZipAccess"/>
+      <wsa10:EndpointReference>
+        <wsa10:Address>http://localhost:9876/RcWareDbGZipAccess</wsa10:Address>
+      </wsa10:EndpointReference>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
