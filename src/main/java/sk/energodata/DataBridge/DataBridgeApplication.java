@@ -9,7 +9,6 @@ public class DataBridgeApplication {
 
 	public static void main(String[] args) {
 
-
 		SpringApplication.run(DataBridgeApplication.class, args);
 	}
 
