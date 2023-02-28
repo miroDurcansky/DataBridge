@@ -1,9 +1,9 @@
 postgres:
-  host: ${POSTGRES_HOST:localhost:5432} 
+  host: ${POSTGRES_HOST:localhost:5434}
   
 spring:
   datasource:
-    url: jdbc:postgresql://${postgres.host}/spring_boot_postgres_db
+    url: jdbc:postgresql://${postgres.host}/eman_postgres_db
     username: postgres
     password: root
 
