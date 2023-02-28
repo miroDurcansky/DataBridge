@@ -1,4 +1,4 @@
-CREATE SCHEMA IF NOT EXISTS eman_postgres_db.eman;
+CREATE SCHEMA IF NOT EXISTS eman;
 
 CREATE TABLE IF NOT EXISTS eman.tag_descs_ab_as_ke (
     id SERIAL NOT NULL PRIMARY KEY,
