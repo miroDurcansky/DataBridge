@@ -3,11 +3,14 @@ postgres:
   
 spring:
   datasource:
-    url: jdbc:postgresql://${postgres.host}/eman_postgres_db
+    url: jdbc:postgresql://${postgres.host}/eman_postgres_db?currentSchema=eman
     username: postgres
     password: root
 
 server:
   error:
     include-message: always
-  port: 8081    
+  port: 8081
+
+flyway:
+  schemas: eman
