@@ -4,6 +4,8 @@ FROM openjdk:8-jdk-alpine
 
 WORKDIR /app
 
+VOLUME /tmp
+
 COPY .mvn/ .mvn
 COPY mvnw pom.xml ./
 RUN ./mvnw dependency:resolve
