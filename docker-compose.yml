@@ -21,7 +21,7 @@ services:
     networks:
       - network
     volumes:
-      - volume:/var/lib/postgresql/data
+      - ./sql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=root
