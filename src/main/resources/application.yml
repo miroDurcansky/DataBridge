@@ -3,7 +3,7 @@ postgres:
   
 spring:
   datasource:
-    url: jdbc:postgresql://${postgres.host}/eman_postgres_db?currentSchema=eman
+    url: jdbc:postgresql://${postgres.host}/eman_postgres_db?currentSchema=public&useSSL=false
     username: postgres
     password: root
 
