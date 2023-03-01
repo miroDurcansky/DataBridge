@@ -30,11 +30,7 @@ public class HelloWorldJob {
         Branch createdBranch = testRepository.save(branch);
         System.err.println(createdBranch);
 
-
-
-
-
-        System.out.println("Hello World!");
+        System.out.println("Cau Mirko!");
     }
 
     private static Student getStudent1() {
