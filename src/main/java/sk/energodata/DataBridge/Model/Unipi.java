@@ -1,4 +1,4 @@
-package sk.energodata.DataBridge;
+package sk.energodata.DataBridge.Model;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;
