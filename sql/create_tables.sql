@@ -15,34 +15,35 @@ CREATE TABLE IF NOT EXISTS tag_descs_ab_as_ke (
 );
 
 CREATE TABLE IF NOT EXISTS tag_vals_ab_as_ke (
-    timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    id INT NOT NULL DEFAULT '0',
-    value DOUBLE PRECISION NOT NULL DEFAULT '0',
-    valid BOOLEAN NOT NULL DEFAULT '0',
-    descs_id INT NOT NULL,
-    CONSTRAINT tag_vals_ab_as_ke_descs_id_fkey FOREIGN KEY (descs_id) REFERENCES tag_descs_ab_as_ke(id)
+    "value_time" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "id" INT NOT NULL DEFAULT '0',
+    "value" DOUBLE PRECISION NOT NULL DEFAULT '0',
+    "valid" BOOLEAN NOT NULL DEFAULT '0',
+    "descs_id" INT NOT NULL,
+    CONSTRAINT tag_vals_ab_as_ke_descs_id_fkey FOREIGN KEY (descs_id) REFERENCES tag_descs_ab_as_ke(id),
+    CONSTRAINT tag_vals_ab_as_ke_pkey PRIMARY KEY (value_time, id)
 );
 
-ALTER TABLE tag_vals_ab_as_ke ADD CONSTRAINT tag_vals_ab_as_ke_pkey PRIMARY KEY (timestamp, id);
-
-CREATE TABLE IF NOT EXISTS branch (
-                        "branch_id" serial PRIMARY KEY,
-                        "branch_short_name" varchar(45) NOT NULL,
-                        "branch_name" varchar(100) NOT NULL,
-                        "description" varchar(200) DEFAULT NULL
-);
-
-CREATE TABLE IF NOT EXISTS student (
-                         "id" serial,
-                         "student_time" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                         "first_name" varchar(45) DEFAULT NULL,
-                         "last_name" varchar(45) DEFAULT NULL,
-                         "contact_no" varchar(45) DEFAULT NULL,
-                         "branch_id" int DEFAULT NULL,
-                         CONSTRAINT "branch_id_fk"
-                             FOREIGN KEY ("branch_id")
-                                 REFERENCES branch ("branch_id")
-);
-
-ALTER TABLE student ADD CONSTRAINT student_pkey PRIMARY KEY (student_time, id);
+-- ALTER TABLE tag_vals_ab_as_ke ADD CONSTRAINT tag_vals_ab_as_ke_pkey PRIMARY KEY (value_time, id);
+--
+-- CREATE TABLE IF NOT EXISTS branch (
+--                         "branch_id" serial PRIMARY KEY,
+--                         "branch_short_name" varchar(45) NOT NULL,
+--                         "branch_name" varchar(100) NOT NULL,
+--                         "description" varchar(200) DEFAULT NULL
+-- );
+--
+-- CREATE TABLE IF NOT EXISTS student (
+--                          "id" serial,
+--                          "student_time" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--                          "first_name" varchar(45) DEFAULT NULL,
+--                          "last_name" varchar(45) DEFAULT NULL,
+--                          "contact_no" varchar(45) DEFAULT NULL,
+--                          "branch_id" int DEFAULT NULL,
+--                          CONSTRAINT "branch_id_fk"
+--                              FOREIGN KEY ("branch_id")
+--                                  REFERENCES branch ("branch_id")
+-- );
+--
+-- ALTER TABLE student ADD CONSTRAINT student_pkey PRIMARY KEY (student_time, id);
 
