@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -38,6 +40,7 @@ public class HelloWorldJob {
         student.setFirstName("Rosy");
         student.setLastName("Larsen");
         student.setContactNo("+1-408-575-1317");
+        student.setStudentTime(LocalDateTime.of(2022, Month.AUGUST, 15, 10, 25, 45));
         return student;
     }
     private static Student getStudent2() {
@@ -45,6 +48,7 @@ public class HelloWorldJob {
         student.setFirstName("Rosy");
         student.setLastName("Larsen");
         student.setContactNo("+1-408-575-1219");
+        student.setStudentTime(LocalDateTime.of(2022, Month.JULY, 15, 10, 25, 45));
         return student;
     }
 }

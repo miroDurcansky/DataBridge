@@ -33,7 +33,8 @@ CREATE TABLE IF NOT EXISTS branch (
 );
 
 CREATE TABLE IF NOT EXISTS student (
-                         "id" serial PRIMARY KEY,
+                         "id" serial,
+                         "student_time" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                          "first_name" varchar(45) DEFAULT NULL,
                          "last_name" varchar(45) DEFAULT NULL,
                          "contact_no" varchar(45) DEFAULT NULL,
@@ -42,4 +43,6 @@ CREATE TABLE IF NOT EXISTS student (
                              FOREIGN KEY ("branch_id")
                                  REFERENCES branch ("branch_id")
 );
+
+ALTER TABLE student ADD CONSTRAINT student_pkey PRIMARY KEY (student_time, id);
 
