@@ -7,6 +7,7 @@ import org.datacontract.schemas._2004._07.esg_db_server.Credentials;
 import org.datacontract.schemas._2004._07.esg_db_server.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import sk.energodata.DataBridge.Model.Unipi;
 import sk.energodata.DataBridge.UnipiRepository;
 
 import javax.annotation.PostConstruct;
@@ -14,6 +15,7 @@ import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Holder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UnipiService {
@@ -36,6 +38,37 @@ public class UnipiService {
         variableNames = new ArrayList<>();
         isAuth = Boolean.FALSE;
     }
+
+    public void saveAllUnipi() {
+        getVariableNames();
+
+        for (int i = 0; i < variableNames.size(); i++) {
+            String name = variableNames.get(i);
+            Optional<Unipi> existingUnipi = unipiRepository.findByName(name);
+            if(!existingUnipi.isPresent()) {
+                Unipi unipi = createUnipi(variableNames.get(i));
+                unipiRepository.save(unipi);
+            }
+        }
+    }
+
+    private Unipi createUnipi(String name) {
+        Unipi unipi = new Unipi();
+        unipi.setName(name);
+        unipi.setDescription("Vonkajšia teplota pri vchode do AB");
+        unipi.setType("PHYSICAL");
+        unipi.setPhysicalType("NUMERIC");
+        unipi.setPhysicalDecimals(1);
+        unipi.setPhysicalUnit("°C");
+        unipi.setPhysicalMin(-55.5);
+        unipi.setPhysicalMax(55.5);
+        unipi.setPhysicalMinAlarm(-25.0);
+        unipi.setPhysicalMaxAlarm(40.0);
+        unipi.setPhysicalMinAlarm(-15.0);
+        unipi.setPhysicalMaxAlarm(35.0);
+        return unipi;
+    }
+
 
     public void getVariableNames() {
         Credentials credentials = getCredentials();

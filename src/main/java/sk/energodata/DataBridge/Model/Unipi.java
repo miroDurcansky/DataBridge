@@ -9,6 +9,7 @@ import org.springframework.data.relational.core.mapping.Table;
 public class Unipi {
     @Id
     private int id;
+    private String name;
     private String description;
     private String type;
     private String physicalType;
