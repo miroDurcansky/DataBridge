@@ -23,7 +23,7 @@ public class UnipiService {
     private static final String DB_URL = "http://db.unipi.technology/dbaccess";
     static int index = 0;
     private UnipiRepository unipiRepository;
-
+    private Boolean isAuth;
     List<String> variableNames;
 
     @Autowired
@@ -34,22 +34,16 @@ public class UnipiService {
     @PostConstruct
     public void init() {
         variableNames = new ArrayList<>();
+        isAuth = Boolean.FALSE;
     }
 
     public void getVariableNames() {
-        org.datacontract.schemas._2004._07.esg_db_server.ObjectFactory of = new ObjectFactory();
-        Credentials credentials = of.createCredentials();
-        credentials.setName(of.createCredentialsName(USER_NAME));
-        credentials.setPassword(of.createCredentialsPassword(USER_PASSWORD));
+        Credentials credentials = getCredentials();
 
-        // *** Make WS-SOAP Client:
-        HistoryDbAccessService srv = new HistoryDbAccessService();// wsdl is in file attached !!!
-        HistoryDbAccess histAccess = srv.getHistoryAccess();
-        BindingProvider bp = (BindingProvider) histAccess;
-        bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, DB_URL);// !!! Set proper End-Piont URL !!
+        HistoryDbAccess histAccess = getHistoryDbAccess();
 
         // *** Confirm USER on ws-server:
-        Boolean isAuth = histAccess.checkCredentials(credentials);
+        isAuth = histAccess.checkCredentials(credentials);
         System.out.println();
         System.out.println(isAuth ? "*** Ok, user's credentials are confirmed."
                 : "!!! FAILED, user's credentials are unconfirmed !");
@@ -72,5 +66,21 @@ public class UnipiService {
         } else {
             System.out.println("authentication failed!");
         }
+    }
+    private static HistoryDbAccess getHistoryDbAccess() {
+        // *** Make WS-SOAP Client:
+        HistoryDbAccessService srv = new HistoryDbAccessService();// wsdl is in file attached !!!
+        HistoryDbAccess histAccess = srv.getHistoryAccess();
+        BindingProvider bp = (BindingProvider) histAccess;
+        bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, DB_URL);// !!! Set proper End-Piont URL !!
+        return histAccess;
+    }
+
+    private static Credentials getCredentials() {
+        ObjectFactory of = new ObjectFactory();
+        Credentials credentials = of.createCredentials();
+        credentials.setName(of.createCredentialsName(USER_NAME));
+        credentials.setPassword(of.createCredentialsPassword(USER_PASSWORD));
+        return credentials;
     }
 }
