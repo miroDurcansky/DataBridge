@@ -8,11 +8,14 @@ import org.datacontract.schemas._2004._07.esg_db_server.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sk.energodata.DataBridge.Model.Unipi;
+import sk.energodata.DataBridge.Model.UnipiValue;
 import sk.energodata.DataBridge.UnipiRepository;
 
 import javax.annotation.PostConstruct;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Holder;
+import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -20,11 +23,13 @@ import java.util.Optional;
 @Service
 public class UnipiService {
 
-    private static final String USER_NAME = "";
-    private static final String USER_PASSWORD = "";
+    private static final String USER_NAME = "unipi_02819";
+    private static final String USER_PASSWORD = "wzY6MAWk";
     private static final String DB_URL = "http://db.unipi.technology/dbaccess";
     static int index = 0;
     private UnipiRepository unipiRepository;
+
+
     private Boolean isAuth;
     List<String> variableNames;
 
@@ -39,16 +44,58 @@ public class UnipiService {
         isAuth = Boolean.FALSE;
     }
 
-    public void saveAllUnipi() {
-        getVariableNames();
+    public void saveUnipi() throws InterruptedException {
+        initVariableNames();
+        saveAllDescriptions();
 
+    }
+
+
+    private void saveAllDescriptions() throws InterruptedException {
         for (int i = 0; i < variableNames.size(); i++) {
             String name = variableNames.get(i);
+
             Optional<Unipi> existingUnipi = unipiRepository.findByName(name);
+
             if(!existingUnipi.isPresent()) {
                 Unipi unipi = createUnipi(variableNames.get(i));
-                unipiRepository.save(unipi);
+
+
+                UnipiValue unipiValue1 = new UnipiValue();
+                unipiValue1.setValueTime(LocalDateTime.now());
+                unipiValue1.setValid(Boolean.TRUE);
+                unipiValue1.setValue(220.5);
+//                unipiValue1.setDescsId(unipi.getId());
+//                unipiValue1 = unipiValueRepository.save(unipiValue1);
+
+
+                UnipiValue unipiValue2 = new UnipiValue();
+                unipiValue2.setValueTime(LocalDateTime.now().minusMinutes(5));
+                unipiValue2.setValid(Boolean.TRUE);
+                unipiValue2.setValue(170.5);
+//                unipiValue2.setDescsId(unipi.getId());
+//                unipiValue2 = unipiValueRepository.save(unipiValue2);
+
+                List<UnipiValue> unipiValues = new ArrayList<>();
+                unipiValues.add(unipiValue1);
+                unipiValues.add(unipiValue2);
+                unipi.setUnipiValues(unipiValues);
+
+                unipi = unipiRepository.save(unipi);
+                System.out.println("name");
+
+//                unipi = unipiRepository.findById(unipi.getId()).get();
+//                unipi.setUnipiValues(unipiValues);
+//                unipiRepository.save(unipi);
+//                System.out.println(unipi.getName());
+//                unipi.setUnipiValues(unipiValues);
+//                unipiRepository.save(unipi);
+//                System.out.println("vsetko som ulozil");
+
+
+            } else {
             }
+
         }
     }
 
@@ -64,15 +111,16 @@ public class UnipiService {
         unipi.setPhysicalMax(55.5);
         unipi.setPhysicalMinAlarm(-25.0);
         unipi.setPhysicalMaxAlarm(40.0);
-        unipi.setPhysicalMinAlarm(-15.0);
-        unipi.setPhysicalMaxAlarm(35.0);
+        unipi.setPhysicalMinWarn(-15.0);
+        unipi.setPhysicalMaxWarn(35.0);
+        unipi.setUnipiValues(new ArrayList<>());
+        //return unipiRepository.save(unipi);
         return unipi;
     }
 
 
-    public void getVariableNames() {
+    private void initVariableNames() {
         Credentials credentials = getCredentials();
-
         HistoryDbAccess histAccess = getHistoryDbAccess();
 
         // *** Confirm USER on ws-server:

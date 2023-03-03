@@ -2,13 +2,16 @@ package sk.energodata.DataBridge.Model;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.MappedCollection;
 import org.springframework.data.relational.core.mapping.Table;
+
+import java.util.List;
 
 @Data
 @Table(name = "tag_descs_ab_as_ke")
 public class Unipi {
     @Id
-    private int id;
+    private Long id;
     private String name;
     private String description;
     private String type;
@@ -21,5 +24,8 @@ public class Unipi {
     private double physicalMaxAlarm;
     private double physicalMinWarn;
     private double physicalMaxWarn;
+
+    @MappedCollection(keyColumn = "id", idColumn = "descs_id")
+    private List<UnipiValue> unipiValues;
 
 }
