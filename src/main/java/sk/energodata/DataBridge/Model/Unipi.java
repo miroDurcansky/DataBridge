@@ -6,6 +6,7 @@ import org.springframework.data.relational.core.mapping.MappedCollection;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.util.List;
+import java.util.Set;
 
 @Data
 @Table(name = "tag_descs_ab_as_ke")
@@ -26,6 +27,6 @@ public class Unipi {
     private double physicalMaxWarn;
 
     @MappedCollection(keyColumn = "id", idColumn = "descs_id")
-    private List<UnipiValue> unipiValues;
+    private Set<UnipiValue> unipiValues;
 
 }

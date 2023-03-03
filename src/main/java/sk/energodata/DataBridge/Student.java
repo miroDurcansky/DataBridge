@@ -6,9 +6,8 @@ import org.springframework.data.annotation.Id;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
-@Data // lombok
+@Data
 public class Student {
-
     @Id
     private Long id;
 

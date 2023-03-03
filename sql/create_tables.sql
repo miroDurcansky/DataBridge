@@ -15,14 +15,21 @@ CREATE TABLE IF NOT EXISTS tag_descs_ab_as_ke (
 );
 
 CREATE TABLE IF NOT EXISTS tag_vals_ab_as_ke (
+    id serial,
     "value_time" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "id" INT NOT NULL DEFAULT '0',
     "value" DOUBLE PRECISION NOT NULL DEFAULT '0',
     "valid" BOOLEAN NOT NULL DEFAULT '0',
     "descs_id" INT NOT NULL,
-    CONSTRAINT tag_vals_ab_as_ke_descs_id_fkey FOREIGN KEY (descs_id) REFERENCES tag_descs_ab_as_ke(id),
-    CONSTRAINT tag_vals_ab_as_ke_pkey PRIMARY KEY (value_time, id)
+    CONSTRAINT tag_vals_ab_as_ke_descs_id_fkey FOREIGN KEY (descs_id) REFERENCES tag_descs_ab_as_ke(id)
 );
+
+ALTER TABLE tag_vals_ab_as_ke ADD CONSTRAINT tag_vals_ab_as_ke_pkey PRIMARY KEY (id);
+
+-- CREATE SEQUENCE tag_vals_ab_as_ke_id_seq;
+--
+-- ALTER TABLE tag_vals_ab_as_ke
+--     ALTER COLUMN id SET DEFAULT nextval('tag_vals_ab_as_ke_id_seq');
+
 
 -- ALTER TABLE tag_vals_ab_as_ke ADD CONSTRAINT tag_vals_ab_as_ke_pkey PRIMARY KEY (value_time, id);
 --

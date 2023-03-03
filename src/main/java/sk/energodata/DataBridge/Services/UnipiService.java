@@ -2,9 +2,7 @@ package sk.energodata.DataBridge.Services;
 
 import eu.rcware.dev.esgdb.HistoryDbAccess;
 import eu.rcware.dev.esgdb.HistoryDbAccessService;
-import org.datacontract.schemas._2004._07.esg_db_server.ArrayOfVariableDescription;
-import org.datacontract.schemas._2004._07.esg_db_server.Credentials;
-import org.datacontract.schemas._2004._07.esg_db_server.ObjectFactory;
+import org.datacontract.schemas._2004._07.esg_db_server.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sk.energodata.DataBridge.Model.Unipi;
@@ -12,19 +10,22 @@ import sk.energodata.DataBridge.Model.UnipiValue;
 import sk.energodata.DataBridge.UnipiRepository;
 
 import javax.annotation.PostConstruct;
+import javax.xml.bind.JAXBElement;
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Holder;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.Month;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class UnipiService {
 
-    private static final String USER_NAME = "unipi_02819";
-    private static final String USER_PASSWORD = "wzY6MAWk";
+    private static final String USER_NAME = "";
+    private static final String USER_PASSWORD = "";
     private static final String DB_URL = "http://db.unipi.technology/dbaccess";
     static int index = 0;
     private UnipiRepository unipiRepository;
@@ -65,33 +66,18 @@ public class UnipiService {
                 unipiValue1.setValueTime(LocalDateTime.now());
                 unipiValue1.setValid(Boolean.TRUE);
                 unipiValue1.setValue(220.5);
-//                unipiValue1.setDescsId(unipi.getId());
-//                unipiValue1 = unipiValueRepository.save(unipiValue1);
-
 
                 UnipiValue unipiValue2 = new UnipiValue();
-                unipiValue2.setValueTime(LocalDateTime.now().minusMinutes(5));
+                unipiValue2.setValueTime(LocalDateTime.now());
                 unipiValue2.setValid(Boolean.TRUE);
                 unipiValue2.setValue(170.5);
-//                unipiValue2.setDescsId(unipi.getId());
-//                unipiValue2 = unipiValueRepository.save(unipiValue2);
 
-                List<UnipiValue> unipiValues = new ArrayList<>();
+                Set<UnipiValue> unipiValues = new HashSet<>();
                 unipiValues.add(unipiValue1);
                 unipiValues.add(unipiValue2);
                 unipi.setUnipiValues(unipiValues);
-
-                unipi = unipiRepository.save(unipi);
-                System.out.println("name");
-
-//                unipi = unipiRepository.findById(unipi.getId()).get();
-//                unipi.setUnipiValues(unipiValues);
-//                unipiRepository.save(unipi);
-//                System.out.println(unipi.getName());
-//                unipi.setUnipiValues(unipiValues);
-//                unipiRepository.save(unipi);
-//                System.out.println("vsetko som ulozil");
-
+                unipiRepository.save(unipi);
+                System.out.println("saved " + unipi.getName());
 
             } else {
             }
@@ -113,11 +99,99 @@ public class UnipiService {
         unipi.setPhysicalMaxAlarm(40.0);
         unipi.setPhysicalMinWarn(-15.0);
         unipi.setPhysicalMaxWarn(35.0);
-        unipi.setUnipiValues(new ArrayList<>());
+;
         //return unipiRepository.save(unipi);
         return unipi;
     }
 
+    private void initValues() throws DatatypeConfigurationException {
+        org.datacontract.schemas._2004._07.esg_db_server.ObjectFactory of = new ObjectFactory();
+        Credentials credentials = of.createCredentials();
+        credentials.setName(of.createCredentialsName(USER_NAME));
+        credentials.setPassword(of.createCredentialsPassword(USER_PASSWORD));
+
+        // *** Make WS-SOAP Client:
+        HistoryDbAccessService srv = new HistoryDbAccessService();// wsdl is in file attached !!!
+        HistoryDbAccess histAccess = srv.getHistoryAccess();
+        BindingProvider bp = (BindingProvider) histAccess;
+        bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, DB_URL);// !!! Set proper End-Piont URL !!
+
+        // *** Confirm USER on ws-server:
+        Boolean isAuth = histAccess.checkCredentials(credentials);
+        System.out.println();
+        System.out.println(isAuth ? "*** Ok, user's credentials are confirmed."
+                : "!!! FAILED, user's credentials are unconfirmed !");
+
+        if (isAuth) {
+            Date current_date = new Date();
+            Date old_date = new Date(100, 11, 21);
+            GregorianCalendar gregorianCalendarCurrentDate = new GregorianCalendar();
+            gregorianCalendarCurrentDate.setTime(current_date);
+            GregorianCalendar gregorianCalendarOldDate = new GregorianCalendar();
+            gregorianCalendarOldDate.setTime(old_date);
+            XMLGregorianCalendar utcFrom = DatatypeFactory.newInstance()
+                    .newXMLGregorianCalendar(gregorianCalendarCurrentDate);
+            XMLGregorianCalendar utcTo = DatatypeFactory.newInstance()
+                    .newXMLGregorianCalendar(gregorianCalendarOldDate);
+
+            Integer variableOffset = 0;
+            Integer variableCount = 10;
+            Integer valueOffset = 0;
+            Integer valueCount = 1000;
+
+            Holder<ArrayOfMvr> getDataResult = new Holder<>();
+            Holder<Integer> nextVariableOffset = new Holder<>();
+            Holder<Integer> nextValueOffset = new Holder<>();
+            Holder<String> returnCode = new Holder<>();
+
+            ArrayOfArrayOfKeyValuePair variableKeys = new ArrayOfArrayOfKeyValuePair();
+            int indexItemInVariableNames = 0;
+            while (indexItemInVariableNames < variableNames.size()) {
+                ArrayOfKeyValuePair arrayOfKeyValuePair = new ArrayOfKeyValuePair();
+                KeyValuePair keyValuePair = new KeyValuePair();
+                ObjectFactory objectFactoryKey = new ObjectFactory();
+                JAXBElement<String> jaxbElementKey = objectFactoryKey.createKeyValuePairKey("VariableName");
+                keyValuePair.setKey(jaxbElementKey);
+                ObjectFactory objectFactoryValue = new ObjectFactory();
+                JAXBElement<String> jaxbElementValue = objectFactoryValue.createKeyValuePairValue(variableNames.get(indexItemInVariableNames));
+                keyValuePair.setValue(jaxbElementValue);
+                keyValuePair.setIsKey(true);
+                arrayOfKeyValuePair.getKeyValuePair().add(keyValuePair);
+                variableKeys.getArrayOfKeyValuePair().add(arrayOfKeyValuePair);
+                indexItemInVariableNames++;
+            };
+
+            histAccess.getData(credentials, variableKeys, utcFrom, utcTo, variableOffset, variableCount, valueOffset, valueCount,
+                    getDataResult, nextVariableOffset, nextValueOffset, returnCode);
+
+            ArrayOfMvr dataResultFromMerevisApi = getDataResult.value;
+
+            List<UnipiValue> valuesForValsTable = new ArrayList<>();
+            for (int i = 0; i < dataResultFromMerevisApi.getMvr().size(); i++) {
+                List<KeyValuePair> keyValuePairList = dataResultFromMerevisApi.getMvr().get(i).getKeys().getValue().getKeyValuePair();
+                KeyValuePair keyValuePair = keyValuePairList.stream().filter(x -> x.getKey().getValue().equals("VariableName")).findFirst().get();
+                String variableName = keyValuePair.getValue().getValue();
+
+                dataResultFromMerevisApi.getMvr().get(i).getVals().getValue().getI().forEach(x -> {
+                    GregorianCalendar gregorianCalendar = x.getGt().toGregorianCalendar();
+//                    Date date = gregorianCalendar.getTime();
+//                    Unipi item = new UnipiValue();
+//                    item.setVariableName(variableName);
+//                    if(x.getDv() != null && x.getDv().getValue() != null) {
+//                        item.setValue(x.getDv().getValue());
+//                    } else {
+//                        item.setValue(0.0);
+//                    }
+//                    item.setValid(true);
+//                    item.setVariableNameId(variableNamesWithId.get(variableName));
+//                    item.setTimestamp(new Timestamp(date.getTime() / 1000 * 1000));  // tymto som pre timestamp odstranil milisekundy. Koli tomu, aby som mohol pouzit replace pre tabulku vals. Koli milisekundam sa insertovali "duplicitne" riadky
+//                    valuesForValsTable.add(item);
+                });
+            }
+            //Collections.sort(valuesForValsTable, (a, b) -> a.getTimestamp().compareTo(b.getTimestamp()));
+
+        }
+    }
 
     private void initVariableNames() {
         Credentials credentials = getCredentials();
