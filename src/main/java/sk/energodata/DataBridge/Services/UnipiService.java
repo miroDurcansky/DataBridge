@@ -17,6 +17,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Holder;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -137,6 +139,10 @@ public class UnipiService {
 
             List<Unipi> unipiList = (List<Unipi>) unipiRepository.findAll();
             Set<Unipi> unipiSet = unipiList.stream().collect(Collectors.toSet());
+            Unipi modifikovanaUnipi = new Unipi();
+            modifikovanaUnipi = createUnipi("pokus");
+            unipiSet.add(modifikovanaUnipi);
+            unipiRepository.saveAll(unipiSet);
 
             for (int i = 0; i < dataResultFromMerevisApi.getMvr().size(); i++) {
                 List<KeyValuePair> keyValuePairList = dataResultFromMerevisApi.getMvr().get(i).getKeys().getValue().getKeyValuePair();
@@ -145,15 +151,24 @@ public class UnipiService {
                 String unipiVariableName = keyValuePair.getValue().getValue();
 
                 Unipi akutalnaUnipi = unipiSet.stream().filter(x -> x.getName().equals(unipiVariableName)).findFirst().get();
-                UnipiValue newValue = new UnipiValue();
-
-
 
                 dataResultFromMerevisApi.getMvr().get(i).getVals().getValue().getI().forEach(x -> {
 
+
+                    UnipiValue newValue = new UnipiValue();
                     newValue.setValid(Boolean.TRUE);
-                    newValue.setValueTime(LocalDateTime.now());
-                    newValue.setValue(169.50);
+                    if(x.getDv() != null && x.getDv().getValue() != null) {
+                        newValue.setValue(x.getDv().getValue());
+                    } else {
+                        newValue.setValue(0.0);
+                    }
+
+                    GregorianCalendar calendar = x.getGt().toGregorianCalendar();
+
+                    LocalDateTime localDateTime = calendar.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime().truncatedTo(ChronoUnit.SECONDS);
+
+                    newValue.setValueTime(localDateTime);
+
 
 //                    GregorianCalendar gregorianCalendar = x.getGt().toGregorianCalendar();
 
@@ -170,12 +185,13 @@ public class UnipiService {
 //                    item.setTimestamp(new Timestamp(date.getTime() / 1000 * 1000));  // tymto som pre timestamp odstranil milisekundy. Koli tomu, aby som mohol pouzit replace pre tabulku vals. Koli milisekundam sa insertovali "duplicitne" riadky
 //                    valuesForValsTable.add(item);
                     akutalnaUnipi.getUnipiValues().add(newValue);
+                    Unipi nova = unipiRepository.save(akutalnaUnipi);
                 });
-                unipiSet.add(akutalnaUnipi);
+//                unipiSet.add(akutalnaUnipi);
             }
 
-            unipiRepository.saveAll(unipiSet);
-            System.out.println("ulozene");
+//            unipiRepository.saveAll(unipiSet);
+//            System.out.println("ulozene");
 
             //Collections.sort(valuesForValsTable, (a, b) -> a.getTimestamp().compareTo(b.getTimestamp()));
 
