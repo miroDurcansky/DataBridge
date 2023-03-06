@@ -5,7 +5,6 @@ import eu.rcware.dev.esgdb.HistoryDbAccessService;
 import org.datacontract.schemas._2004._07.esg_db_server.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
 import sk.energodata.DataBridge.Model.Unipi;
 import sk.energodata.DataBridge.Model.UnipiValue;
@@ -27,13 +26,13 @@ import java.util.stream.Collectors;
 @Service
 public class UnipiService {
     @Value("${unipi.username}")
-    private String USER_NAME;
+    private String userName;
 
     @Value("${unipi.password}")
-    private String USER_PASSWORD;
+    private String userPassword;
 
     @Value("${unipi.mervisUrl}")
-    private String DB_URL;
+    private String dbUrl;
     static int index = 0;
     private UnipiRepository unipiRepository;
 
@@ -51,7 +50,7 @@ public class UnipiService {
         isAuth = Boolean.FALSE;
     }
 
-    public void saveUnipi() throws InterruptedException, DatatypeConfigurationException {
+    public void saveUnipi() throws DatatypeConfigurationException {
         getAllVariablesFromMervis();
         saveAllVariablesIntoPosgres();
         saveValsFromMervisIntoPostgres();
@@ -61,14 +60,14 @@ public class UnipiService {
 
         org.datacontract.schemas._2004._07.esg_db_server.ObjectFactory of = new ObjectFactory();
         Credentials credentials = of.createCredentials();
-        credentials.setName(of.createCredentialsName(USER_NAME));
-        credentials.setPassword(of.createCredentialsPassword(USER_PASSWORD));
+        credentials.setName(of.createCredentialsName(userName));
+        credentials.setPassword(of.createCredentialsPassword(userPassword));
 
         // *** Make WS-SOAP Client:
         HistoryDbAccessService srv = new HistoryDbAccessService();// wsdl is in file attached !!!
         HistoryDbAccess histAccess = srv.getHistoryAccess();
         BindingProvider bp = (BindingProvider) histAccess;
-        bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, DB_URL);// !!! Set proper End-Piont URL !!
+        bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, dbUrl);// !!! Set proper End-Piont URL !!
 
         // *** Confirm USER on ws-server:
         Boolean isAuth = histAccess.checkCredentials(credentials);
@@ -162,30 +161,8 @@ public class UnipiService {
 
             if(!existingUnipi.isPresent()) {
                 Unipi unipi = createUnipi(variableNames.get(i));
-
-                UnipiValue unipiValue1 = new UnipiValue();
-                unipiValue1.setValueTime(LocalDateTime.now());
-                unipiValue1.setValid(Boolean.TRUE);
-                unipiValue1.setValue(220.5);
-
-                UnipiValue unipiValue2 = new UnipiValue();
-                unipiValue2.setValueTime(LocalDateTime.now());
-                unipiValue2.setValid(Boolean.TRUE);
-                unipiValue2.setValue(170.5);
-
-                UnipiValue unipiValue3 = new UnipiValue();
-                unipiValue3.setValueTime(LocalDateTime.now().minusMonths(5));
-                unipiValue3.setValid(Boolean.TRUE);
-                unipiValue3.setValue(170.5);
-
-                Set<UnipiValue> unipiValues = new HashSet<>();
-                unipiValues.add(unipiValue1);
-                unipiValues.add(unipiValue2);
-                unipiValues.add(unipiValue3);
-                unipi.setUnipiValues(unipiValues);
                 unipiRepository.save(unipi);
                 System.out.println("saved " + unipi.getName());
-
             }
         }
     }
@@ -212,8 +189,19 @@ public class UnipiService {
 
 
     private void getAllVariablesFromMervis() {
-        Credentials credentials = getCredentials();
-        HistoryDbAccess histAccess = getHistoryDbAccess();
+
+        ObjectFactory of = new ObjectFactory();
+        Credentials credentials = of.createCredentials();
+        credentials.setName(of.createCredentialsName(userName));
+        credentials.setPassword(of.createCredentialsPassword(userPassword));
+
+        //Credentials credentials = getCredentials();
+        // HistoryDbAccess histAccess = getHistoryDbAccess();
+
+        HistoryDbAccessService srv = new HistoryDbAccessService();// wsdl is in file attached !!!
+        HistoryDbAccess histAccess = srv.getHistoryAccess();
+        BindingProvider bp = (BindingProvider) histAccess;
+        bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, dbUrl);// !!! Set proper End-Piont URL !!
 
         // *** Confirm USER on ws-server:
         isAuth = histAccess.checkCredentials(credentials);
@@ -223,7 +211,7 @@ public class UnipiService {
 
         if (isAuth) {
             System.out.println();
-            System.out.println("*** Ok, read All Variables from " + DB_URL);
+            System.out.println("*** Ok, read All Variables from " + dbUrl);
             Holder<ArrayOfVariableDescription> getAllVariablesResult = new Holder<>();
             Holder<Boolean> moreDataAvailable = new Holder<>();
             // READ ALL Variables:
@@ -245,15 +233,15 @@ public class UnipiService {
         HistoryDbAccessService srv = new HistoryDbAccessService();// wsdl is in file attached !!!
         HistoryDbAccess histAccess = srv.getHistoryAccess();
         BindingProvider bp = (BindingProvider) histAccess;
-        bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, DB_URL);// !!! Set proper End-Piont URL !!
+        bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, dbUrl);// !!! Set proper End-Piont URL !!
         return histAccess;
     }
 
     private Credentials getCredentials() {
         ObjectFactory of = new ObjectFactory();
         Credentials credentials = of.createCredentials();
-        credentials.setName(of.createCredentialsName(USER_NAME));
-        credentials.setPassword(of.createCredentialsPassword(USER_PASSWORD));
+        credentials.setName(of.createCredentialsName(userName));
+        credentials.setPassword(of.createCredentialsPassword(userPassword));
         return credentials;
     }
 }

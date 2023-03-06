@@ -25,32 +25,3 @@ CREATE TABLE IF NOT EXISTS tag_vals_ab_as_ke (
 
 ALTER TABLE tag_vals_ab_as_ke ADD CONSTRAINT tag_vals_ab_as_ke_pkey PRIMARY KEY (id);
 
--- CREATE SEQUENCE tag_vals_ab_as_ke_id_seq;
---
--- ALTER TABLE tag_vals_ab_as_ke
---     ALTER COLUMN id SET DEFAULT nextval('tag_vals_ab_as_ke_id_seq');
-
-
--- ALTER TABLE tag_vals_ab_as_ke ADD CONSTRAINT tag_vals_ab_as_ke_pkey PRIMARY KEY (value_time, id);
---
--- CREATE TABLE IF NOT EXISTS branch (
---                         "branch_id" serial PRIMARY KEY,
---                         "branch_short_name" varchar(45) NOT NULL,
---                         "branch_name" varchar(100) NOT NULL,
---                         "description" varchar(200) DEFAULT NULL
--- );
---
--- CREATE TABLE IF NOT EXISTS student (
---                          "id" serial,
---                          "student_time" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
---                          "first_name" varchar(45) DEFAULT NULL,
---                          "last_name" varchar(45) DEFAULT NULL,
---                          "contact_no" varchar(45) DEFAULT NULL,
---                          "branch_id" int DEFAULT NULL,
---                          CONSTRAINT "branch_id_fk"
---                              FOREIGN KEY ("branch_id")
---                                  REFERENCES branch ("branch_id")
--- );
---
--- ALTER TABLE student ADD CONSTRAINT student_pkey PRIMARY KEY (student_time, id);
-
