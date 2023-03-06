@@ -23,6 +23,7 @@ import java.util.Set;
 @Component
 public class HelloWorldJob {
 
+
     private static final String DB_URL = "http://db.unipi.technology/dbaccess";
     static int index;
     @Autowired
@@ -33,7 +34,7 @@ public class HelloWorldJob {
     public void sayHelloWorld() throws DatatypeConfigurationException, InterruptedException {
 
         // unipiService.saveUnipi();;
-        unipiService.saveValsFromMervisIntoPostgres();
+        unipiService.saveUnipi();
 
         List<String> variableNames = new ArrayList<>();
         // *** Make user's credentials:

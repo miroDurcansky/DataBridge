@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 @Service
 public class UnipiService {
 
-
     private static final String DB_URL = "http://db.unipi.technology/dbaccess";
     static int index = 0;
     private UnipiRepository unipiRepository;
@@ -114,35 +113,50 @@ public class UnipiService {
 
             /* nacitam unipi items z postgres databazy */
 
+//              List<Unipi> unipiList = (List<Unipi>) unipiRepository.findAll();
+//
+//            UnipiValue unipiValueOK = new UnipiValue();
+//            unipiValueOK.setValueTime(LocalDateTime.now());
+//            unipiValueOK.setValue(145.50);
+//            unipiValueOK.setValid(Boolean.TRUE);
+//
+//            UnipiValue unipiValueNOK = unipiList.get(0).getUnipiValues().stream().findFirst().get();
+//
+//            /* + este pridat do mnoziny tie unipi, ktore nemaju zatial ziadne values v postgres */
+//
+//            Set<UnipiValue> unipiValueSet = new HashSet<>();
+//            unipiValueSet.add(unipiValueOK);
+//            unipiValueSet.add(unipiValueNOK);
+//
+//            unipiList.get(0).getUnipiValues().addAll(unipiValueSet);
+//
+//            unipiList = (List<Unipi>) unipiRepository.saveAll(unipiList);
+//
+//            Set<Unipi> unipiSetNew = unipiRepository.findBetweenDates(LocalDateTime.now().minusHours(1), LocalDateTime.now()).stream().collect(Collectors.toSet());
+
+
             List<Unipi> unipiList = (List<Unipi>) unipiRepository.findAll();
+            Set<Unipi> unipiSet = unipiList.stream().collect(Collectors.toSet());
 
-            UnipiValue unipiValueOK = new UnipiValue();
-            unipiValueOK.setValueTime(LocalDateTime.now());
-            unipiValueOK.setValue(145.50);
-            unipiValueOK.setValid(Boolean.TRUE);
-
-            UnipiValue unipiValueNOK = unipiList.get(0).getUnipiValues().stream().findFirst().get();
-
-            /* + este pridat do mnoziny tie unipi, ktore nemaju zatial ziadne values v postgres */
-
-            Set<UnipiValue> unipiValueSet = new HashSet<>();
-            unipiValueSet.add(unipiValueOK);
-            unipiValueSet.add(unipiValueNOK);
-
-            unipiList.get(0).getUnipiValues().addAll(unipiValueSet);
-
-            unipiList = (List<Unipi>) unipiRepository.saveAll(unipiList);
-
-            Set<Unipi> unipiSetNew = unipiRepository.findBetweenDates(LocalDateTime.now().minusHours(1), LocalDateTime.now()).stream().collect(Collectors.toSet());
-
-            List<UnipiValue> valuesForValsTable = new ArrayList<>();
             for (int i = 0; i < dataResultFromMerevisApi.getMvr().size(); i++) {
                 List<KeyValuePair> keyValuePairList = dataResultFromMerevisApi.getMvr().get(i).getKeys().getValue().getKeyValuePair();
                 KeyValuePair keyValuePair = keyValuePairList.stream().filter(x -> x.getKey().getValue().equals("VariableName")).findFirst().get();
-                String variableName = keyValuePair.getValue().getValue();
+
+                String unipiVariableName = keyValuePair.getValue().getValue();
+
+                Unipi akutalnaUnipi = unipiSet.stream().filter(x -> x.getName().equals(unipiVariableName)).findFirst().get();
+                UnipiValue newValue = new UnipiValue();
+
+
 
                 dataResultFromMerevisApi.getMvr().get(i).getVals().getValue().getI().forEach(x -> {
-                    GregorianCalendar gregorianCalendar = x.getGt().toGregorianCalendar();
+
+                    newValue.setValid(Boolean.TRUE);
+                    newValue.setValueTime(LocalDateTime.now());
+                    newValue.setValue(169.50);
+
+//                    GregorianCalendar gregorianCalendar = x.getGt().toGregorianCalendar();
+
 //                    Date date = gregorianCalendar.getTime();
 //                    Unipi item = new UnipiValue();
 //                    item.setVariableName(variableName);
@@ -155,8 +169,14 @@ public class UnipiService {
 //                    item.setVariableNameId(variableNamesWithId.get(variableName));
 //                    item.setTimestamp(new Timestamp(date.getTime() / 1000 * 1000));  // tymto som pre timestamp odstranil milisekundy. Koli tomu, aby som mohol pouzit replace pre tabulku vals. Koli milisekundam sa insertovali "duplicitne" riadky
 //                    valuesForValsTable.add(item);
+                    akutalnaUnipi.getUnipiValues().add(newValue);
                 });
+                unipiSet.add(akutalnaUnipi);
             }
+
+            unipiRepository.saveAll(unipiSet);
+            System.out.println("ulozene");
+
             //Collections.sort(valuesForValsTable, (a, b) -> a.getTimestamp().compareTo(b.getTimestamp()));
 
         }
