@@ -57,23 +57,11 @@ public class UnipiService {
     }
 
     public void saveValsFromMervisIntoPostgres() throws DatatypeConfigurationException {
-
-        org.datacontract.schemas._2004._07.esg_db_server.ObjectFactory of = new ObjectFactory();
-        Credentials credentials = of.createCredentials();
-        credentials.setName(of.createCredentialsName(userName));
-        credentials.setPassword(of.createCredentialsPassword(userPassword));
-
-        // *** Make WS-SOAP Client:
-        HistoryDbAccessService srv = new HistoryDbAccessService();// wsdl is in file attached !!!
-        HistoryDbAccess histAccess = srv.getHistoryAccess();
-        BindingProvider bp = (BindingProvider) histAccess;
-        bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, dbUrl);// !!! Set proper End-Piont URL !!
+        Credentials credentials = getCredentials();
+        HistoryDbAccess histAccess = getHistoryDbAccess();
 
         // *** Confirm USER on ws-server:
         Boolean isAuth = histAccess.checkCredentials(credentials);
-        System.out.println();
-        System.out.println(isAuth ? "*** Ok, user's credentials are confirmed."
-                : "!!! FAILED, user's credentials are unconfirmed !");
 
         if (isAuth) {
             Date current_date = new Date();
@@ -129,7 +117,7 @@ public class UnipiService {
 
                 String unipiVariableName = keyValuePair.getValue().getValue();
 
-                Unipi akutalnaUnipi = unipiSet.stream().filter(x -> x.getName().equals(unipiVariableName)).findFirst().get();
+                Unipi selectedUnipiByName = unipiSet.stream().filter(x -> x.getName().equals(unipiVariableName)).findFirst().get();
 
                 dataResultFromMerevisApi.getMvr().get(i).getVals().getValue().getI().forEach(x -> {
                     UnipiValue newValue = new UnipiValue();
@@ -146,8 +134,8 @@ public class UnipiService {
 
                     newValue.setValueTime(localDateTime);
 
-                    akutalnaUnipi.getUnipiValues().add(newValue);
-                    Unipi nova = unipiRepository.save(akutalnaUnipi);
+                    selectedUnipiByName.getUnipiValues().add(newValue);
+                    unipiRepository.save(selectedUnipiByName);
                 });
             }
         }
@@ -187,29 +175,13 @@ public class UnipiService {
 
 
     private void getAllVariablesFromMervis() {
-
-        ObjectFactory of = new ObjectFactory();
-        Credentials credentials = of.createCredentials();
-        credentials.setName(of.createCredentialsName(userName));
-        credentials.setPassword(of.createCredentialsPassword(userPassword));
-
-        //Credentials credentials = getCredentials();
-        // HistoryDbAccess histAccess = getHistoryDbAccess();
-
-        HistoryDbAccessService srv = new HistoryDbAccessService();// wsdl is in file attached !!!
-        HistoryDbAccess histAccess = srv.getHistoryAccess();
-        BindingProvider bp = (BindingProvider) histAccess;
-        bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, dbUrl);// !!! Set proper End-Piont URL !!
+         Credentials credentials = getCredentials();
+         HistoryDbAccess histAccess = getHistoryDbAccess();
 
         // *** Confirm USER on ws-server:
         isAuth = histAccess.checkCredentials(credentials);
-        System.out.println();
-        System.out.println(isAuth ? "*** Ok, user's credentials are confirmed."
-                : "!!! FAILED, user's credentials are unconfirmed !");
 
         if (isAuth) {
-            System.out.println();
-            System.out.println("*** Ok, read All Variables from " + dbUrl);
             Holder<ArrayOfVariableDescription> getAllVariablesResult = new Holder<>();
             Holder<Boolean> moreDataAvailable = new Holder<>();
             // READ ALL Variables:

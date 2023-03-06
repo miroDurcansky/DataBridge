@@ -16,8 +16,9 @@ public class SavingDataJob {
     @Scheduled(fixedRate = 60000)
     public void savingDataJob() throws DatatypeConfigurationException {
 
+        System.out.println("****** start loading data from Mervis  ******* " + LocalTime.now());
         unipiService.saveUnipi();
-        System.out.println("Loaded data from Mervis" + LocalTime.now());
+        System.out.println("Loaded data from Mervis  ******* " + LocalTime.now());
 
     }
 }
