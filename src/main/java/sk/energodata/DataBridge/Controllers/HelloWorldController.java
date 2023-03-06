@@ -1,4 +1,4 @@
-package sk.energodata.DataBridge;
+package sk.energodata.DataBridge.Controllers;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;

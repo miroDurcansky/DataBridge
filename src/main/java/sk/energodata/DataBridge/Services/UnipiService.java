@@ -6,9 +6,9 @@ import org.datacontract.schemas._2004._07.esg_db_server.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import sk.energodata.DataBridge.Model.Unipi;
-import sk.energodata.DataBridge.Model.UnipiValue;
-import sk.energodata.DataBridge.UnipiRepository;
+import sk.energodata.DataBridge.Models.Unipi;
+import sk.energodata.DataBridge.Models.UnipiValue;
+import sk.energodata.DataBridge.Repository.UnipiRepository;
 
 import javax.annotation.PostConstruct;
 import javax.xml.bind.JAXBElement;

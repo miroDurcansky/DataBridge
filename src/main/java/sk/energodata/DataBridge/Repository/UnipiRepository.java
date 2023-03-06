@@ -1,10 +1,10 @@
-package sk.energodata.DataBridge;
+package sk.energodata.DataBridge.Repository;
 
 import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import sk.energodata.DataBridge.Model.Unipi;
+import sk.energodata.DataBridge.Models.Unipi;
 
 import java.time.LocalDateTime;
 import java.util.List;
