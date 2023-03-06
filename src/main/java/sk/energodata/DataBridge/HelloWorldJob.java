@@ -10,6 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import sk.energodata.DataBridge.Services.UnipiService;
 
+import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Holder;
 import java.time.LocalDateTime;
@@ -22,8 +23,6 @@ import java.util.Set;
 @Component
 public class HelloWorldJob {
 
-    private static final String USER_NAME = "unipi_02819";
-    private static final String USER_PASSWORD = "wzY6MAWk";
     private static final String DB_URL = "http://db.unipi.technology/dbaccess";
     static int index;
     @Autowired
@@ -31,9 +30,10 @@ public class HelloWorldJob {
     @Autowired
     private UnipiService unipiService;
     @Scheduled(fixedRate = 60000)
-    public void sayHelloWorld() throws InterruptedException {
+    public void sayHelloWorld() throws DatatypeConfigurationException, InterruptedException {
 
-        unipiService.saveUnipi();
+        // unipiService.saveUnipi();;
+        unipiService.saveValsFromMervisIntoPostgres();
 
         List<String> variableNames = new ArrayList<>();
         // *** Make user's credentials:

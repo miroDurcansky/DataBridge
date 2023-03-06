@@ -16,20 +16,17 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Holder;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.time.Month;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class UnipiService {
 
-    private static final String USER_NAME = "";
-    private static final String USER_PASSWORD = "";
+
     private static final String DB_URL = "http://db.unipi.technology/dbaccess";
     static int index = 0;
     private UnipiRepository unipiRepository;
-
 
     private Boolean isAuth;
     List<String> variableNames;
@@ -45,66 +42,15 @@ public class UnipiService {
         isAuth = Boolean.FALSE;
     }
 
-    public void saveUnipi() throws InterruptedException {
-        initVariableNames();
-        saveAllDescriptions();
+    public void saveUnipi() throws InterruptedException, DatatypeConfigurationException {
+        getAllVariablesFromMervis();
+        saveAllVariablesIntoPosgres();
+        saveValsFromMervisIntoPostgres();
 
     }
 
+    public void saveValsFromMervisIntoPostgres() throws DatatypeConfigurationException {
 
-    private void saveAllDescriptions() throws InterruptedException {
-        for (int i = 0; i < variableNames.size(); i++) {
-            String name = variableNames.get(i);
-
-            Optional<Unipi> existingUnipi = unipiRepository.findByName(name);
-
-            if(!existingUnipi.isPresent()) {
-                Unipi unipi = createUnipi(variableNames.get(i));
-
-
-                UnipiValue unipiValue1 = new UnipiValue();
-                unipiValue1.setValueTime(LocalDateTime.now());
-                unipiValue1.setValid(Boolean.TRUE);
-                unipiValue1.setValue(220.5);
-
-                UnipiValue unipiValue2 = new UnipiValue();
-                unipiValue2.setValueTime(LocalDateTime.now());
-                unipiValue2.setValid(Boolean.TRUE);
-                unipiValue2.setValue(170.5);
-
-                Set<UnipiValue> unipiValues = new HashSet<>();
-                unipiValues.add(unipiValue1);
-                unipiValues.add(unipiValue2);
-                unipi.setUnipiValues(unipiValues);
-                unipiRepository.save(unipi);
-                System.out.println("saved " + unipi.getName());
-
-            } else {
-            }
-
-        }
-    }
-
-    private Unipi createUnipi(String name) {
-        Unipi unipi = new Unipi();
-        unipi.setName(name);
-        unipi.setDescription("Vonkajšia teplota pri vchode do AB");
-        unipi.setType("PHYSICAL");
-        unipi.setPhysicalType("NUMERIC");
-        unipi.setPhysicalDecimals(1);
-        unipi.setPhysicalUnit("°C");
-        unipi.setPhysicalMin(-55.5);
-        unipi.setPhysicalMax(55.5);
-        unipi.setPhysicalMinAlarm(-25.0);
-        unipi.setPhysicalMaxAlarm(40.0);
-        unipi.setPhysicalMinWarn(-15.0);
-        unipi.setPhysicalMaxWarn(35.0);
-;
-        //return unipiRepository.save(unipi);
-        return unipi;
-    }
-
-    private void initValues() throws DatatypeConfigurationException {
         org.datacontract.schemas._2004._07.esg_db_server.ObjectFactory of = new ObjectFactory();
         Credentials credentials = of.createCredentials();
         credentials.setName(of.createCredentialsName(USER_NAME));
@@ -166,6 +112,29 @@ public class UnipiService {
 
             ArrayOfMvr dataResultFromMerevisApi = getDataResult.value;
 
+            /* nacitam unipi items z postgres databazy */
+
+            List<Unipi> unipiList = (List<Unipi>) unipiRepository.findAll();
+
+            UnipiValue unipiValueOK = new UnipiValue();
+            unipiValueOK.setValueTime(LocalDateTime.now());
+            unipiValueOK.setValue(145.50);
+            unipiValueOK.setValid(Boolean.TRUE);
+
+            UnipiValue unipiValueNOK = unipiList.get(0).getUnipiValues().stream().findFirst().get();
+
+            /* + este pridat do mnoziny tie unipi, ktore nemaju zatial ziadne values v postgres */
+
+            Set<UnipiValue> unipiValueSet = new HashSet<>();
+            unipiValueSet.add(unipiValueOK);
+            unipiValueSet.add(unipiValueNOK);
+
+            unipiList.get(0).getUnipiValues().addAll(unipiValueSet);
+
+            unipiList = (List<Unipi>) unipiRepository.saveAll(unipiList);
+
+            Set<Unipi> unipiSetNew = unipiRepository.findBetweenDates(LocalDateTime.now().minusHours(1), LocalDateTime.now()).stream().collect(Collectors.toSet());
+
             List<UnipiValue> valuesForValsTable = new ArrayList<>();
             for (int i = 0; i < dataResultFromMerevisApi.getMvr().size(); i++) {
                 List<KeyValuePair> keyValuePairList = dataResultFromMerevisApi.getMvr().get(i).getKeys().getValue().getKeyValuePair();
@@ -193,7 +162,67 @@ public class UnipiService {
         }
     }
 
-    private void initVariableNames() {
+    private void saveAllVariablesIntoPosgres() {
+        for (int i = 0; i < variableNames.size(); i++) {
+            String name = variableNames.get(i);
+
+            Optional<Unipi> existingUnipi = unipiRepository.findByName(name);
+
+            if(!existingUnipi.isPresent()) {
+                Unipi unipi = createUnipi(variableNames.get(i));
+
+                UnipiValue unipiValue1 = new UnipiValue();
+                unipiValue1.setValueTime(LocalDateTime.now());
+                unipiValue1.setValid(Boolean.TRUE);
+                unipiValue1.setValue(220.5);
+
+                UnipiValue unipiValue2 = new UnipiValue();
+                unipiValue2.setValueTime(LocalDateTime.now());
+                unipiValue2.setValid(Boolean.TRUE);
+                unipiValue2.setValue(170.5);
+
+                UnipiValue unipiValue3 = new UnipiValue();
+                unipiValue3.setValueTime(LocalDateTime.now().minusMonths(5));
+                unipiValue3.setValid(Boolean.TRUE);
+                unipiValue3.setValue(170.5);
+
+                Set<UnipiValue> unipiValues = new HashSet<>();
+                unipiValues.add(unipiValue1);
+                unipiValues.add(unipiValue2);
+                unipiValues.add(unipiValue3);
+                unipi.setUnipiValues(unipiValues);
+                unipiRepository.save(unipi);
+                System.out.println("saved " + unipi.getName());
+
+            } else {
+                System.out.println("There are no new descriptions.");
+            }
+
+        }
+    }
+
+    private Unipi createUnipi(String name) {
+        Unipi unipi = new Unipi();
+        unipi.setName(name);
+        unipi.setDescription("Vonkajšia teplota pri vchode do AB");
+        unipi.setType("PHYSICAL");
+        unipi.setPhysicalType("NUMERIC");
+        unipi.setPhysicalDecimals(1);
+        unipi.setPhysicalUnit("°C");
+        unipi.setPhysicalMin(-55.5);
+        unipi.setPhysicalMax(55.5);
+        unipi.setPhysicalMinAlarm(-25.0);
+        unipi.setPhysicalMaxAlarm(40.0);
+        unipi.setPhysicalMinWarn(-15.0);
+        unipi.setPhysicalMaxWarn(35.0);
+;
+        //return unipiRepository.save(unipi);
+        return unipi;
+    }
+
+
+
+    private void getAllVariablesFromMervis() {
         Credentials credentials = getCredentials();
         HistoryDbAccess histAccess = getHistoryDbAccess();
 
