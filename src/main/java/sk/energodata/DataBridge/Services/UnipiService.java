@@ -4,6 +4,8 @@ import eu.rcware.dev.esgdb.HistoryDbAccess;
 import eu.rcware.dev.esgdb.HistoryDbAccessService;
 import org.datacontract.schemas._2004._07.esg_db_server.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
 import sk.energodata.DataBridge.Model.Unipi;
 import sk.energodata.DataBridge.Model.UnipiValue;
@@ -24,8 +26,14 @@ import java.util.stream.Collectors;
 
 @Service
 public class UnipiService {
+    @Value("${unipi.username}")
+    private String USER_NAME;
 
-    private static final String DB_URL = "http://db.unipi.technology/dbaccess";
+    @Value("${unipi.password}")
+    private String USER_PASSWORD;
+
+    @Value("${unipi.mervisUrl}")
+    private String DB_URL;
     static int index = 0;
     private UnipiRepository unipiRepository;
 
@@ -47,7 +55,6 @@ public class UnipiService {
         getAllVariablesFromMervis();
         saveAllVariablesIntoPosgres();
         saveValsFromMervisIntoPostgres();
-
     }
 
     public void saveValsFromMervisIntoPostgres() throws DatatypeConfigurationException {
@@ -113,36 +120,9 @@ public class UnipiService {
 
             ArrayOfMvr dataResultFromMerevisApi = getDataResult.value;
 
-            /* nacitam unipi items z postgres databazy */
-
-//              List<Unipi> unipiList = (List<Unipi>) unipiRepository.findAll();
-//
-//            UnipiValue unipiValueOK = new UnipiValue();
-//            unipiValueOK.setValueTime(LocalDateTime.now());
-//            unipiValueOK.setValue(145.50);
-//            unipiValueOK.setValid(Boolean.TRUE);
-//
-//            UnipiValue unipiValueNOK = unipiList.get(0).getUnipiValues().stream().findFirst().get();
-//
-//            /* + este pridat do mnoziny tie unipi, ktore nemaju zatial ziadne values v postgres */
-//
-//            Set<UnipiValue> unipiValueSet = new HashSet<>();
-//            unipiValueSet.add(unipiValueOK);
-//            unipiValueSet.add(unipiValueNOK);
-//
-//            unipiList.get(0).getUnipiValues().addAll(unipiValueSet);
-//
-//            unipiList = (List<Unipi>) unipiRepository.saveAll(unipiList);
-//
-//            Set<Unipi> unipiSetNew = unipiRepository.findBetweenDates(LocalDateTime.now().minusHours(1), LocalDateTime.now()).stream().collect(Collectors.toSet());
-
 
             List<Unipi> unipiList = (List<Unipi>) unipiRepository.findAll();
             Set<Unipi> unipiSet = unipiList.stream().collect(Collectors.toSet());
-            Unipi modifikovanaUnipi = new Unipi();
-            modifikovanaUnipi = createUnipi("pokus");
-            unipiSet.add(modifikovanaUnipi);
-            unipiRepository.saveAll(unipiSet);
 
             for (int i = 0; i < dataResultFromMerevisApi.getMvr().size(); i++) {
                 List<KeyValuePair> keyValuePairList = dataResultFromMerevisApi.getMvr().get(i).getKeys().getValue().getKeyValuePair();
@@ -153,8 +133,6 @@ public class UnipiService {
                 Unipi akutalnaUnipi = unipiSet.stream().filter(x -> x.getName().equals(unipiVariableName)).findFirst().get();
 
                 dataResultFromMerevisApi.getMvr().get(i).getVals().getValue().getI().forEach(x -> {
-
-
                     UnipiValue newValue = new UnipiValue();
                     newValue.setValid(Boolean.TRUE);
                     if(x.getDv() != null && x.getDv().getValue() != null) {
@@ -169,32 +147,10 @@ public class UnipiService {
 
                     newValue.setValueTime(localDateTime);
 
-
-//                    GregorianCalendar gregorianCalendar = x.getGt().toGregorianCalendar();
-
-//                    Date date = gregorianCalendar.getTime();
-//                    Unipi item = new UnipiValue();
-//                    item.setVariableName(variableName);
-//                    if(x.getDv() != null && x.getDv().getValue() != null) {
-//                        item.setValue(x.getDv().getValue());
-//                    } else {
-//                        item.setValue(0.0);
-//                    }
-//                    item.setValid(true);
-//                    item.setVariableNameId(variableNamesWithId.get(variableName));
-//                    item.setTimestamp(new Timestamp(date.getTime() / 1000 * 1000));  // tymto som pre timestamp odstranil milisekundy. Koli tomu, aby som mohol pouzit replace pre tabulku vals. Koli milisekundam sa insertovali "duplicitne" riadky
-//                    valuesForValsTable.add(item);
                     akutalnaUnipi.getUnipiValues().add(newValue);
                     Unipi nova = unipiRepository.save(akutalnaUnipi);
                 });
-//                unipiSet.add(akutalnaUnipi);
             }
-
-//            unipiRepository.saveAll(unipiSet);
-//            System.out.println("ulozene");
-
-            //Collections.sort(valuesForValsTable, (a, b) -> a.getTimestamp().compareTo(b.getTimestamp()));
-
         }
     }
 
@@ -230,10 +186,7 @@ public class UnipiService {
                 unipiRepository.save(unipi);
                 System.out.println("saved " + unipi.getName());
 
-            } else {
-                System.out.println("There are no new descriptions.");
             }
-
         }
     }
 
@@ -287,7 +240,7 @@ public class UnipiService {
             System.out.println("authentication failed!");
         }
     }
-    private static HistoryDbAccess getHistoryDbAccess() {
+    private HistoryDbAccess getHistoryDbAccess() {
         // *** Make WS-SOAP Client:
         HistoryDbAccessService srv = new HistoryDbAccessService();// wsdl is in file attached !!!
         HistoryDbAccess histAccess = srv.getHistoryAccess();
@@ -296,7 +249,7 @@ public class UnipiService {
         return histAccess;
     }
 
-    private static Credentials getCredentials() {
+    private Credentials getCredentials() {
         ObjectFactory of = new ObjectFactory();
         Credentials credentials = of.createCredentials();
         credentials.setName(of.createCredentialsName(USER_NAME));

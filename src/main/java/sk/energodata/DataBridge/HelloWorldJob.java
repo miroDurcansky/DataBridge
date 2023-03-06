@@ -6,6 +6,8 @@ import org.datacontract.schemas._2004._07.esg_db_server.ArrayOfVariableDescripti
 import org.datacontract.schemas._2004._07.esg_db_server.Credentials;
 import org.datacontract.schemas._2004._07.esg_db_server.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import sk.energodata.DataBridge.Services.UnipiService;
@@ -23,8 +25,14 @@ import java.util.Set;
 @Component
 public class HelloWorldJob {
 
+    @Value("${unipi.username}")
+    private String USER_NAME;
 
-    private static final String DB_URL = "http://db.unipi.technology/dbaccess";
+    @Value("${unipi.password}")
+    private String USER_PASSWORD;
+
+    @Value("${unipi.mervisUrl}")
+    private String DB_URL;
     static int index;
     @Autowired
     private BranchOneToManyTestRepository testRepository;
