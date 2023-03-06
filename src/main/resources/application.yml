@@ -7,7 +7,17 @@ spring:
     username: postgres
     password: root
 
+  logging:
+    level:
+      org:
+        springframework: DEBUG
+
 server:
   error:
     include-message: always
   port: 8081
+
+unipi:
+  username: unipi_02819
+  password:
+  mervisUrl: http://db.unipi.technology/dbaccess

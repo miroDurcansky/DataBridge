@@ -162,7 +162,6 @@ public class UnipiService {
             if(!existingUnipi.isPresent()) {
                 Unipi unipi = createUnipi(variableNames.get(i));
                 unipiRepository.save(unipi);
-                System.out.println("saved " + unipi.getName());
             }
         }
     }
@@ -181,8 +180,7 @@ public class UnipiService {
         unipi.setPhysicalMaxAlarm(40.0);
         unipi.setPhysicalMinWarn(-15.0);
         unipi.setPhysicalMaxWarn(35.0);
-;
-        //return unipiRepository.save(unipi);
+
         return unipi;
     }
 

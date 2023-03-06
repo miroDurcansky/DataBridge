@@ -5,6 +5,7 @@ FROM openjdk:8-jdk-alpine
 WORKDIR /app
 
 VOLUME /tmp
+COPY mervisdb_wsdl-2017-07-12.xml /app
 
 COPY .mvn/ .mvn
 COPY mvnw pom.xml ./
