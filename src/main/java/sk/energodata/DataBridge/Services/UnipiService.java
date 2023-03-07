@@ -134,8 +134,10 @@ public class UnipiService {
 
                     newValue.setValueTime(localDateTime);
 
-                    selectedUnipiByName.getUnipiValues().add(newValue);
-                    unipiRepository.save(selectedUnipiByName);
+                    if(newValue.getValue() != 0.0) {
+                        selectedUnipiByName.getUnipiValues().add(newValue);
+                        unipiRepository.save(selectedUnipiByName);
+                    }
                 });
             }
         }
