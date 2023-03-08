@@ -24,19 +24,3 @@ CREATE TABLE IF NOT EXISTS tag_vals_ab_as_ke (
 );
 
 ALTER TABLE tag_vals_ab_as_ke ADD CONSTRAINT tag_vals_ab_as_ke_pkey PRIMARY KEY (id);
-
-
-create table movie (
-    id serial primary key,
-    title text,
-    description text
-);
-
-create table rental (
-    id serial primary key,
-    movie integer references movie(id),
-    movie_key integer,
-    duration text,
-    price integer,
-    cas TIMESTAMP
-)

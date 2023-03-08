@@ -51,6 +51,8 @@ public class UnipiService {
     }
 
     public void saveUnipi() throws DatatypeConfigurationException {
+//        List<Unipi> vsetky = (List<Unipi>) unipiRepository.findAll();
+//        Set<Unipi> unipiList = unipiRepository.findRecords(LocalDateTime.now().minusMinutes(20), LocalDateTime.now());
         getAllVariablesFromMervis();
         saveAllVariablesIntoPosgres();
         saveValsFromMervisIntoPostgres();
