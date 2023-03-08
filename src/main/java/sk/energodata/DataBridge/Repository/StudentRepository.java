@@ -6,4 +6,7 @@ import sk.energodata.DataBridge.Models.Student;
 
 @Repository
 public interface StudentRepository extends CrudRepository<Student, Long> {
+
+
 }
+

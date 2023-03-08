@@ -25,16 +25,16 @@ CREATE TABLE IF NOT EXISTS tag_vals_ab_as_ke (
 
 ALTER TABLE tag_vals_ab_as_ke ADD CONSTRAINT tag_vals_ab_as_ke_pkey PRIMARY KEY (id);
 
-create table student (
-     "id" SERIAL NOT NULL PRIMARY KEY,
-     "name" text,
-     "department" text
-);
-
-create table subject (
-     id serial not null primary key ,
-     "value_time" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-     "subject" text,
-     "student_id" int not null,
-     constraint subject_student_id_fkey foreign key (student_id) references student(id)
-);
+-- create table student (
+--      "id" SERIAL NOT NULL PRIMARY KEY,
+--      "name" text,
+--      "department" text
+-- );
+--
+-- create table subject (
+--      id serial not null primary key ,
+--      "value_time" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--      "subject" text,
+--      "student_id" int not null,
+--      constraint subject_student_id_fkey foreign key (student_id) references student(id)
+-- );
