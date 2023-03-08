@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import sk.energodata.DataBridge.Models.Student;
 import sk.energodata.DataBridge.Models.Subject;
 import sk.energodata.DataBridge.Models.Unipi;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -16,7 +15,6 @@ import java.util.*;
 
 @Component
 public class UnipiDao {
-
     @Autowired
     JdbcTemplate jdbcTemplate;
 

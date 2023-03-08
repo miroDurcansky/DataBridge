@@ -8,9 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import sk.energodata.DataBridge.Models.Unipi;
 import sk.energodata.DataBridge.Models.UnipiValue;
-import sk.energodata.DataBridge.Repository.StudentRepository;
 import sk.energodata.DataBridge.Repository.UnipiRepository;
-
 import javax.annotation.PostConstruct;
 import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -23,8 +21,6 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
-
-
 @Service
 public class UnipiService {
     @Value("${unipi.username}")
@@ -36,25 +32,26 @@ public class UnipiService {
     @Value("${unipi.mervisUrl}")
     private String dbUrl;
     private UnipiRepository unipiRepository;
-    private StudentRepository studentRepository;
     private UnipiDao unipiDao;
-    private Boolean isAuth;
+    private Boolean isAuth = Boolean.FALSE;
     List<String> variableNames;
     static int index = 0;
     private List<Unipi> unipisWithoutValues;
+    Credentials credentials;
+    HistoryDbAccess histAccess;
 
     @Autowired
-    public UnipiService(UnipiRepository unipiRepository, StudentRepository studentRepository, UnipiDao unipiDao) {
+    public UnipiService(UnipiRepository unipiRepository, UnipiDao unipiDao) {
         this.unipiRepository = unipiRepository;
-        this.studentRepository = studentRepository;
         this.unipiDao = unipiDao;
     }
-
     @PostConstruct
     public void init() {
         this.variableNames = new ArrayList<>();
-        this.isAuth = Boolean.FALSE;
-        this.unipisWithoutValues = unipiDao.getAllUnipiWithoutValues();
+        this.credentials =  getCredentials();
+        this.histAccess = getHistoryDbAccess();
+        this.isAuth = histAccess.checkCredentials(credentials);
+        this.unipisWithoutValues = new ArrayList<>();
     }
 
     public void saveUnipi() throws DatatypeConfigurationException {
@@ -62,14 +59,7 @@ public class UnipiService {
         saveAllVariablesIntoPosgresDb();
         saveValsFromMervisIntoPostgres();
     }
-
     private void saveValsFromMervisIntoPostgres() throws DatatypeConfigurationException {
-        Credentials credentials = getCredentials();
-        HistoryDbAccess histAccess = getHistoryDbAccess();
-
-        // *** Confirm USER on ws-server:
-        Boolean isAuth = histAccess.checkCredentials(credentials);
-
         if (isAuth) {
             Date current_date = new Date();
             Date old_date = new Date(100, 11, 21);
@@ -148,8 +138,8 @@ public class UnipiService {
             }
         }
     }
-
     private void saveAllVariablesIntoPosgresDb() {
+        this.unipisWithoutValues = unipiDao.getAllUnipiWithoutValues();
         for (int i = 0; i < variableNames.size(); i++) {
             String name = variableNames.get(i);
             Optional<Unipi> existingUnipi = unipisWithoutValues.stream().filter(x -> x.getName().equals(name)).findFirst();
@@ -159,17 +149,9 @@ public class UnipiService {
                 unipiRepository.save(unipi);
             }
         }
+        this.unipisWithoutValues = unipiDao.getAllUnipiWithoutValues();
     }
-
-
-
     private void getAllVariablesFromMervis() {
-         Credentials credentials = getCredentials();
-         HistoryDbAccess histAccess = getHistoryDbAccess();
-
-        // *** Confirm USER on ws-server:
-        isAuth = histAccess.checkCredentials(credentials);
-
         if (isAuth) {
             Holder<ArrayOfVariableDescription> getAllVariablesResult = new Holder<>();
             Holder<Boolean> moreDataAvailable = new Holder<>();
@@ -187,7 +169,6 @@ public class UnipiService {
             System.out.println("authentication failed!");
         }
     }
-
     private Unipi createUnipi(String name) {
         Unipi unipi = new Unipi();
         unipi.setName(name);
@@ -212,7 +193,6 @@ public class UnipiService {
         bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, dbUrl);// !!! Set proper End-Piont URL !!
         return histAccess;
     }
-
     private Credentials getCredentials() {
         ObjectFactory of = new ObjectFactory();
         Credentials credentials = of.createCredentials();
