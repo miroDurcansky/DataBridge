@@ -5,9 +5,15 @@ import eu.rcware.dev.esgdb.HistoryDbAccessService;
 import org.datacontract.schemas._2004._07.esg_db_server.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.repository.query.Param;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import sk.energodata.DataBridge.Models.Student;
+import sk.energodata.DataBridge.Models.Subject;
 import sk.energodata.DataBridge.Models.Unipi;
 import sk.energodata.DataBridge.Models.UnipiValue;
+import sk.energodata.DataBridge.Repository.StudentRepository;
 import sk.energodata.DataBridge.Repository.UnipiRepository;
 
 import javax.annotation.PostConstruct;
@@ -17,11 +23,14 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Holder;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.springframework.jdbc.core.ResultSetExtractor;
 
 @Service
 public class UnipiService {
@@ -33,15 +42,19 @@ public class UnipiService {
 
     @Value("${unipi.mervisUrl}")
     private String dbUrl;
-    static int index = 0;
+    private JdbcTemplate jdbcTemplate;
+        static int index = 0;
     private UnipiRepository unipiRepository;
 
+    private StudentRepository studentRepository;
     private Boolean isAuth;
     List<String> variableNames;
 
     @Autowired
-    public UnipiService(UnipiRepository unipiRepository) {
+    public UnipiService(UnipiRepository unipiRepository, JdbcTemplate jdbcTemplate, StudentRepository studentRepository) {
         this.unipiRepository = unipiRepository;
+        this.jdbcTemplate = jdbcTemplate;
+        this.studentRepository = studentRepository;
     }
 
     @PostConstruct
@@ -51,11 +64,88 @@ public class UnipiService {
     }
 
     public void saveUnipi() throws DatatypeConfigurationException {
-//        List<Unipi> vsetky = (List<Unipi>) unipiRepository.findAll();
-//        Set<Unipi> unipiList = unipiRepository.findRecords(LocalDateTime.now().minusMinutes(20), LocalDateTime.now());
+
+        Subject subject = new Subject();
+        subject.setSubject("telesna");
+        subject.setValueTime(LocalDateTime.now());
+
+        Subject subject2 = new Subject();
+        subject2.setSubject("nemcina");
+        subject2.setValueTime(LocalDateTime.now().minusMinutes(30));
+
+        Set<Subject> set = new HashSet<>();
+        set.add(subject2);
+        set.add(subject);
+
+        Student studentDb = new Student();
+        studentDb.setName("mirko");
+        studentDb.setDepartment("IT");
+        studentDb.setSubjectSet(set);
+
+        //studentRepository.save(studentDb);
+        System.out.println("ulozene");
+
+
+
+
+//        List<Student> studentDetailList = jdbcTemplate.query("SELECT * FROM student", rs -> {
+//            List<Student> studentDetailList1 = new ArrayList<Student>();
+//            while(rs.next()) {
+//                Student student = new Student();
+//                // 1, 2 and 3 are the indices of the data present
+//                // in the database respectively
+//                student.setId(rs.getInt(1));
+//                student.setName(rs.getString(2));
+//                //student.setDepartment(rs.getString(3));
+//                studentDetailList1.add(student);
+//            }
+//            return studentDetailList1;
+//        });
+
+
+
+        List<Student> students = getAllStudentDetailsWithSubjects(LocalDateTime.now().minusMinutes(20), LocalDateTime.now());
+
+
+
         getAllVariablesFromMervis();
         saveAllVariablesIntoPosgres();
         saveValsFromMervisIntoPostgres();
+    }
+
+    public List<Student> getAllStudentDetailsWithSubjects(LocalDateTime startDate,LocalDateTime endDate) {
+
+        // Implementation of ResultSetExtractor interface
+        return jdbcTemplate.query("SELECT * FROM student st, subject sb where st.id = sb.student_id and sb.value_time BETWEEN ? AND ?", new Object[]{startDate, endDate}, new ResultSetExtractor<List<Student>>() {
+
+            // extractData() is ResultSetExtractor
+            // interface's method
+            public List<Student> extractData(ResultSet rs) throws SQLException, DataAccessException {
+                Map<Integer, Student> studentMap = new HashMap<>(); // mapa študentov
+                while(rs.next()) {
+                    int studentId = rs.getInt(1);
+                    Student student;
+                    if (!studentMap.containsKey(studentId)) { // ak sa študent ešte nenachádza v mape, vytvoríme ho
+                        student = new Student();
+                        student.setId(studentId);
+                        student.setName(rs.getString("name"));
+                        student.setDepartment(rs.getString("department"));
+                        student.setSubjectSet(new HashSet<>());
+                        studentMap.put(studentId, student);
+                    } else { // ak sa študent už nachádza v mape, získame ho z mapy
+                        student = studentMap.get(studentId);
+                    }
+                    Subject subject = new Subject(); // vytvoríme nový predmet
+                    subject.setId(rs.getLong(4));
+                    subject.setValueTime(rs.getTimestamp("value_time").toLocalDateTime());
+                    subject.setSubject(rs.getString("subject"));
+                    subject.setStudentId(Long.valueOf(studentId));
+                    student.getSubjectSet().add(subject); // pridáme predmet do množiny študenta
+                }
+                return new ArrayList<>(studentMap.values());
+            }
+
+        });
     }
 
     public void saveValsFromMervisIntoPostgres() throws DatatypeConfigurationException {
