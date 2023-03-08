@@ -104,7 +104,12 @@ public class UnipiService {
 
             ArrayOfMvr dataResultFromMerevisApi = getDataResult.value;
 
-            List<Unipi> unipiList = (List<Unipi>) unipiRepository.findAll();
+            // List<Unipi> unipiList = (List<Unipi>) unipiRepository.findAll();
+            List<Unipi> unipiList = unipiDao.getUnipiWithValuesFromTo(LocalDateTime.now().minusHours(5), LocalDateTime.now());
+            if(unipiList.size() == 0) {
+                unipiList = (List<Unipi>) unipiRepository.findAll();
+            }
+
             Set<Unipi> unipiSet = unipiList.stream().collect(Collectors.toSet());
 
             for (int i = 0; i < dataResultFromMerevisApi.getMvr().size(); i++) {
@@ -131,7 +136,9 @@ public class UnipiService {
 
                     newValue.setValueTime(localDateTime);
 
-                    selectedUnipiByName.getUnipiValues().add(newValue);
+                    if(!selectedUnipiByName.getUnipiValues().contains(newValue)) {
+                        selectedUnipiByName.getUnipiValues().add(newValue);
+                    }
                 });
 
                 Unipi savedUnipi = unipiRepository.save(selectedUnipiByName);

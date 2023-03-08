@@ -10,10 +10,9 @@ import java.time.LocalTime;
 
 @Component
 public class SavingDataJob {
-    static int index;
     @Autowired
     private UnipiService unipiService;
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 120000)
     public void savingDataJob() throws DatatypeConfigurationException {
         System.out.println("****** start loading data from Mervis  ******* time: " + LocalTime.now());
         unipiService.saveUnipi();
