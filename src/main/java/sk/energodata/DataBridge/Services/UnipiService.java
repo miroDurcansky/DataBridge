@@ -104,7 +104,8 @@ public class UnipiService {
 
             ArrayOfMvr dataResultFromMerevisApi = getDataResult.value;
 
-            Set<Unipi> unipiSet = unipisWithoutValues.stream().collect(Collectors.toSet());
+            List<Unipi> unipiList = (List<Unipi>) unipiRepository.findAll();
+            Set<Unipi> unipiSet = unipiList.stream().collect(Collectors.toSet());
 
             for (int i = 0; i < dataResultFromMerevisApi.getMvr().size(); i++) {
                 List<KeyValuePair> keyValuePairList = dataResultFromMerevisApi.getMvr().get(i).getKeys().getValue().getKeyValuePair();
@@ -113,7 +114,7 @@ public class UnipiService {
                 String unipiVariableName = keyValuePair.getValue().getValue();
 
                 Unipi selectedUnipiByName = unipiSet.stream().filter(x -> x.getName().equals(unipiVariableName)).findFirst().get();
-                selectedUnipiByName.setUnipiValues(new HashSet<>());
+                //selectedUnipiByName.setUnipiValues(new HashSet<>());
 
                 dataResultFromMerevisApi.getMvr().get(i).getVals().getValue().getI().forEach(x -> {
                     UnipiValue newValue = new UnipiValue();
@@ -130,11 +131,11 @@ public class UnipiService {
 
                     newValue.setValueTime(localDateTime);
 
-                    if(newValue.getValue() != 0.0) {
-                        selectedUnipiByName.getUnipiValues().add(newValue);
-                        unipiRepository.save(selectedUnipiByName);
-                    }
+                    selectedUnipiByName.getUnipiValues().add(newValue);
                 });
+
+                Unipi savedUnipi = unipiRepository.save(selectedUnipiByName);
+                System.out.println("save unipi value with amount: " + savedUnipi.getUnipiValues().size());
             }
         }
     }
