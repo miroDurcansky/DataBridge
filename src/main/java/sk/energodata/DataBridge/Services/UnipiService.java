@@ -105,7 +105,7 @@ public class UnipiService {
             ArrayOfMvr dataResultFromMerevisApi = getDataResult.value;
 
             // List<Unipi> unipiList = (List<Unipi>) unipiRepository.findAll();
-            List<Unipi> unipiList = unipiDao.getUnipiWithValuesFromTo(LocalDateTime.now().minusHours(5), LocalDateTime.now());
+            List<Unipi> unipiList =  (List<Unipi>) unipiRepository.findAll(); //unipiDao.getUnipiWithValuesFromTo(LocalDateTime.now().minusMinutes(15), LocalDateTime.now());
             if(unipiList.size() == 0) {
                 unipiList = (List<Unipi>) unipiRepository.findAll();
             }
