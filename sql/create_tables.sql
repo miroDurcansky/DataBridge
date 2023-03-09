@@ -25,10 +25,14 @@ CREATE TABLE IF NOT EXISTS tag_vals_ab_as_ke (
 
 ALTER TABLE tag_vals_ab_as_ke ADD CONSTRAINT tag_vals_ab_as_ke_pkey PRIMARY KEY (id);
 
+ALTER TABLE tag_vals_ab_as_ke ADD CONSTRAINT tag_vals_ab_as_ke_value_time_descs_id_key UNIQUE (value_time, descs_id);
+
+
 -- create table student (
 --      "id" SERIAL NOT NULL PRIMARY KEY,
 --      "name" text,
---      "department" text
+--      "department" text,
+--      CONSTRAINT unique_name_department UNIQUE (name, department)
 -- );
 --
 -- create table subject (
@@ -38,3 +42,5 @@ ALTER TABLE tag_vals_ab_as_ke ADD CONSTRAINT tag_vals_ab_as_ke_pkey PRIMARY KEY 
 --      "student_id" int not null,
 --      constraint subject_student_id_fkey foreign key (student_id) references student(id)
 -- );
+--
+-- CREATE UNIQUE INDEX idx_student_name_department ON student (name, department);

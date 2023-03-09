@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import sk.energodata.DataBridge.Models.Unipi;
 import sk.energodata.DataBridge.Models.UnipiValue;
 import sk.energodata.DataBridge.Repository.UnipiRepository;
+import sk.energodata.DataBridge.Repository.UnipiValueRepository;
+
 import javax.annotation.PostConstruct;
 import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -17,6 +19,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Holder;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -39,11 +42,13 @@ public class UnipiService {
     private List<Unipi> unipisWithoutValues;
     Credentials credentials;
     HistoryDbAccess histAccess;
+    UnipiValueRepository unipiValueRepository;
 
     @Autowired
-    public UnipiService(UnipiRepository unipiRepository, UnipiDao unipiDao) {
+    public UnipiService(UnipiRepository unipiRepository, UnipiDao unipiDao, UnipiValueRepository unipiValueRepository) {
         this.unipiRepository = unipiRepository;
         this.unipiDao = unipiDao;
+        this.unipiValueRepository = unipiValueRepository;
     }
     @PostConstruct
     public void init() {
@@ -105,12 +110,12 @@ public class UnipiService {
             ArrayOfMvr dataResultFromMerevisApi = getDataResult.value;
 
             // List<Unipi> unipiList = (List<Unipi>) unipiRepository.findAll();
-            List<Unipi> unipiList =  (List<Unipi>) unipiRepository.findAll(); //unipiDao.getUnipiWithValuesFromTo(LocalDateTime.now().minusMinutes(15), LocalDateTime.now());
-            if(unipiList.size() == 0) {
-                unipiList = (List<Unipi>) unipiRepository.findAll();
-            }
+//            List<Unipi> unipiList =  (List<Unipi>) unipiRepository.findAll(); //unipiDao.getUnipiWithValuesFromTo(LocalDateTime.now().minusMinutes(15), LocalDateTime.now());
+//            if(unipiList.size() == 0) {
+//                unipiList = (List<Unipi>) unipiRepository.findAll();
+//            }
 
-            Set<Unipi> unipiSet = unipiList.stream().collect(Collectors.toSet());
+//            Set<Unipi> unipiSet = unipiList.stream().collect(Collectors.toSet());
 
             for (int i = 0; i < dataResultFromMerevisApi.getMvr().size(); i++) {
                 List<KeyValuePair> keyValuePairList = dataResultFromMerevisApi.getMvr().get(i).getKeys().getValue().getKeyValuePair();
@@ -118,7 +123,7 @@ public class UnipiService {
 
                 String unipiVariableName = keyValuePair.getValue().getValue();
 
-                Unipi selectedUnipiByName = unipiSet.stream().filter(x -> x.getName().equals(unipiVariableName)).findFirst().get();
+                Unipi selectedUnipiByName = unipisWithoutValues.stream().filter(x -> x.getName().equals(unipiVariableName)).findFirst().get();
                 //selectedUnipiByName.setUnipiValues(new HashSet<>());
 
                 dataResultFromMerevisApi.getMvr().get(i).getVals().getValue().getI().forEach(x -> {
@@ -136,13 +141,10 @@ public class UnipiService {
 
                     newValue.setValueTime(localDateTime);
 
-                    if(!selectedUnipiByName.getUnipiValues().contains(newValue)) {
-                        selectedUnipiByName.getUnipiValues().add(newValue);
-                    }
-                });
+                    unipiValueRepository.saveOrUpdateValue(newValue.getValueTime(), selectedUnipiByName.getId()
+                            , newValue.getValue(), Boolean.TRUE);
 
-                Unipi savedUnipi = unipiRepository.save(selectedUnipiByName);
-                System.out.println("save unipi value with amount: " + savedUnipi.getUnipiValues().size());
+                });
             }
         }
     }

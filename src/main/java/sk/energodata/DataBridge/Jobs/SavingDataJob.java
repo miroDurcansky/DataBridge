@@ -12,7 +12,7 @@ import java.time.LocalTime;
 public class SavingDataJob {
     @Autowired
     private UnipiService unipiService;
-    @Scheduled(fixedRate = 120000)
+    @Scheduled(fixedRate = 1200000)
     public void savingDataJob() throws DatatypeConfigurationException {
         System.out.println("****** start loading data from Mervis  ******* time: " + LocalTime.now());
         unipiService.saveUnipi();
