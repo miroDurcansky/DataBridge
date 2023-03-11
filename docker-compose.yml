@@ -13,6 +13,17 @@ services:
       - postgresDb
     restart: on-failure
 
+#  emanApp:
+#    image: eman:latest
+#    container_name: eman-postgres-app
+#    environment:
+#      - POSTGRES_HOST=postgresDb
+#    ports:
+#      - "8082:8082"
+#    networks:
+#      - network
+#    restart: on-failure
+
   postgresDb:
     image: postgres:13.2
     container_name: databridge-postgres-db
