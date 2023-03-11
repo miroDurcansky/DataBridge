@@ -2,13 +2,11 @@ package sk.energodata.DataBridge.Models;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
-
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Table(name = "tag_vals_ab_as_ke")
 public class UnipiValue {
-
     @Id
     private Long id;
     private LocalDateTime valueTime;
